@@ -76,24 +76,83 @@
         <div class="glass-card w-full max-w-sm p-8">
             <h2 class="text-xl font-bold mb-6 italic">DEPLOY NEW MACHINE</h2>
             <div class="space-y-4">
-                <input type="password" id="token" placeholder="GitHub Token" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500">
-                <input type="text" id="owner" placeholder="Tên người tạo" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500">
-                <button onclick="deploy()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-xs uppercase tracking-widest mt-4">Khởi Chạy</button>
-                <button onclick="document.getElementById('add-modal').style.display='none'" class="w-full text-xs font-bold opacity-30">HỦY BỎ</button>
+                <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-white">
+                <input type="text" id="owner-name" placeholder="Tên người tạo" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-white">
+                
+                <select id="os-choice" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-white text-sm">
+                    <option value="Windows">Windows Server</option>
+                    <option value="Ubuntu">Ubuntu Linux</option>
+                </select>
+
+                <button id="btn-deploy" onclick="deployVM()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-xs uppercase tracking-widest mt-4 transition-all">
+                    Khởi Chạy
+                </button>
+                <button onclick="document.getElementById('add-modal').style.display='none'" class="w-full text-xs font-bold opacity-30 uppercase tracking-widest">HỦY BỎ</button>
             </div>
         </div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        
+        const REPO = "vpsf0605-dev/zunrdp-Cloud";
+
+        // Hàm tính thời gian chạy
         function getUptime(start) {
             if (!start) return "00h 00m 00s";
             let diff = Math.floor((Date.now() - start) / 1000);
+            if (diff < 0) diff = 0;
             let h = Math.floor(diff / 3600).toString().padStart(2, '0');
             let m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
             let s = (diff % 60).toString().padStart(2, '0');
             return `${h}h ${m}m ${s}s`;
+        }
+
+        // --- TÍNH NĂNG TẠO VM ĐÃ ĐƯỢC SỬA LỖI ---
+        async function deployVM() {
+            const token = document.getElementById('gh-token').value;
+            const owner = document.getElementById('owner-name').value;
+            const os = document.getElementById('os-choice').value;
+            const btn = document.getElementById('btn-deploy');
+
+            if (!token || !owner) {
+                alert("Vui lòng nhập đầy đủ Token và Tên người tạo!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "ĐANG GỬI LỆNH...";
+
+            try {
+                // Gửi request đến GitHub API
+                const response = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ref: 'main',
+                        inputs: {
+                            machine_name: os,
+                            owner_name: owner
+                        }
+                    })
+                });
+
+                if (response.status === 204) {
+                    alert("🚀 Thành công! Máy ảo đang được khởi tạo trên GitHub.");
+                    document.getElementById('add-modal').style.display = 'none';
+                } else {
+                    const errorData = await response.json();
+                    alert("❌ Lỗi: " + (errorData.message || "Kiểm tra lại Token hoặc tên Repo"));
+                }
+            } catch (err) {
+                alert("❌ Lỗi kết nối: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "KHỞI CHẠY";
+            }
         }
 
         async function refresh() {
@@ -138,26 +197,27 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <button onclick="navigator.clipboard.writeText('${vm.ip}')" class="flex-1 h-12 glass-card hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest transition-all">Copy IP</button>
-                            <button onclick="kill('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
+                            <button onclick="navigator.clipboard.writeText('${vm.ip}'); alert('Đã copy IP!')" class="flex-1 h-12 glass-card hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest transition-all">Copy IP</button>
+                            <button onclick="killVM('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
                                 <i class="fas fa-power-off"></i>
                             </button>
                         </div>
                     </div>`;
                 }
-                document.getElementById('vm-list').innerHTML = html || '<p class="text-center py-20 opacity-20 italic">Chưa có máy nào online...</p>';
+                document.getElementById('vm-list').innerHTML = html || '<p class="text-center py-20 opacity-20 italic font-bold uppercase tracking-widest text-xs">Chưa có máy nào online</p>';
                 document.getElementById('total-vms').innerText = count;
             } catch (e) {}
         }
 
-        async function kill(id) {
+        async function killVM(id) {
             if(confirm("Tắt máy ngay lập tức?")) {
                 await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+                alert("Đã gửi lệnh tắt máy!");
             }
         }
 
-        // Chạy refresh mỗi giây để đồng hồ chạy mượt
-        setInterval(refresh, 1000); refresh();
+        setInterval(refresh, 1000); 
+        refresh();
     </script>
 </body>
 </html>
