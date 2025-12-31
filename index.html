@@ -2,29 +2,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP |  v8.0</title>
+    <title>ZUNRDP | ULTIMATE CLOUD CONTROL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .btn-main { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: 0.3s; color: white; }
+        .btn-main { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: 0.3s; color: white; border: none; }
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
         .input-style { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; }
         .progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
         .progress-fill { height: 100%; transition: width 0.8s ease; }
-        .card-vm { border-left: 4px solid #3b82f6; }
     </style>
 </head>
 <body class="p-4">
 
     <div id="auth-gate" class="min-h-[90vh] flex items-center justify-center">
         <div class="glass p-8 w-full max-w-sm text-center border-t-4 border-blue-500 shadow-2xl">
-            <h1 class="text-4xl font-black italic mb-6 text-white tracking-tighter">ZUNRDP</h1>
+            <h1 class="text-4xl font-black italic mb-6 tracking-tighter">ZUNRDP</h1>
             <div class="space-y-4">
                 <input type="text" id="u-in" placeholder="Username" class="input-style w-full p-4 rounded-2xl text-center">
                 <input type="password" id="p-in" placeholder="Password" class="input-style w-full p-4 rounded-2xl text-center">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-3" id="login-btns">
                     <button onclick="auth('login')" class="btn-main py-4 rounded-2xl font-black text-xs uppercase">Login</button>
                     <button onclick="toggleAuth(true)" class="bg-white/5 py-4 rounded-2xl font-black text-xs uppercase border border-white/10">Reg</button>
                 </div>
@@ -41,23 +41,23 @@
             <div>
                 <h2 id="hello" class="text-2xl font-black italic text-blue-400"></h2>
                 <div class="flex items-center gap-2 mt-1">
-                    <p id="vm-count" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">0 MÁY ONLINE</p>
+                    <p id="vm-count" class="text-[9px] font-bold text-gray-500 uppercase">0 MÁY ONLINE</p>
                     <span id="limit-info" class="text-[9px] font-bold text-purple-500 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase">LIMIT: 0</span>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button id="admin-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass text-yellow-500 flex items-center justify-center shadow-lg"><i class="fas fa-crown"></i></button>
-                <button onclick="location.reload()" class="w-12 h-12 glass text-red-500 flex items-center justify-center shadow-lg"><i class="fas fa-power-off"></i></button>
+                <button id="admin-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass text-yellow-500 flex items-center justify-center"><i class="fas fa-crown"></i></button>
+                <button onclick="location.reload()" class="w-12 h-12 glass text-red-500 flex items-center justify-center"><i class="fas fa-power-off"></i></button>
             </div>
         </header>
 
         <div class="glass p-6 mb-8 border-t-4 border-blue-600 shadow-xl">
-            <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase text-center">My Access Key:</p>
+            <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase text-center">Mã Key của bạn:</p>
             <div class="bg-black/40 p-4 rounded-xl mb-4 text-center border border-white/5">
                 <p id="my-key" class="text-xl font-black tracking-widest font-mono text-purple-400">CHỜ CẤP</p>
             </div>
             <input type="text" id="key-input" placeholder="Dán mã ZUN-XXXX..." class="input-style w-full p-4 rounded-2xl outline-none mb-4 text-center font-bold text-blue-400 border border-blue-500/20">
-            <button onclick="createVM()" id="run-btn" class="w-full btn-main py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">
+            <button onclick="createVM()" id="run-btn" class="w-full btn-main py-5 rounded-2xl font-black text-xs uppercase tracking-widest">
                 <i class="fas fa-play mr-2"></i> KHỞI TẠO WINDOWS VM
             </button>
         </div>
@@ -81,6 +81,7 @@
         let currentVMCount = 0;
 
         function toggleAuth(reg) {
+            document.getElementById('login-btns').style.display = reg ? 'none' : 'grid';
             document.getElementById('reg-btns').style.display = reg ? 'block' : 'none';
         }
 
@@ -98,11 +99,11 @@
                     else {
                         const data = await fetch(`${API}/users/${u}.json`).then(r => r.json());
                         if(data && data.password === p) me = { id:u, role:'user', ...data };
-                        else return alert("Sai tài khoản!");
+                        else return alert("Sai tài khoản hoặc mật khẩu!");
                     }
                     start();
                 }
-            } catch(e) { alert("Lỗi kết nối Firebase!"); }
+            } catch(e) { alert("Lỗi Firebase!"); }
         }
 
         function start() {
@@ -127,8 +128,8 @@
                 for(let u in users) { if(users[u].key === inputKey) { target = users[u]; break; } }
                 if(inputKey === "ADMIN-MASTER") target = { githubToken: "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", customRepo: "vpsf0605-dev/zunrdp-Cloud", maxVM: 999 };
 
-                if(!target) throw new Error("Key không hợp lệ!");
-                if(currentVMCount >= target.maxVM) throw new Error("Đạt giới hạn máy!");
+                if(!target || !target.githubToken || !target.customRepo) throw new Error("Key sai hoặc chưa cấu hình Token/Repo!");
+                if(currentVMCount >= target.maxVM) throw new Error("Đã đạt giới hạn máy!");
 
                 const res = await fetch(`https://api.github.com/repos/${target.customRepo}/actions/workflows/vm.yml/dispatches`, {
                     method:'POST',
@@ -136,8 +137,8 @@
                     body: JSON.stringify({ref:'main', inputs:{access_key: "ADMIN-MASTER"}})
                 });
 
-                if(res.ok || res.status === 204) alert("🚀 Gửi lệnh thành công!");
-                else alert("❌ Lỗi GitHub: Check lại Token/Repo!");
+                if(res.ok || res.status === 204) alert("🚀 Gửi lệnh khởi tạo thành công!");
+                else alert("❌ Lỗi GitHub: Kiểm tra Token!");
             } catch(e) { alert("❌ " + e.message); }
             btn.disabled = false; btn.innerText = "KHỞI TẠO WINDOWS VM";
         }
@@ -149,13 +150,14 @@
                 let h = ''; let count = 0;
                 for(let id in vms) {
                     const v = vms[id];
+                    // FIX: Admin thấy tất cả, Member thấy máy có owner = username
                     if(me.role !== 'admin' && v.owner !== me.id) continue;
                     if(Date.now() - v.lastSeen > 120000) continue;
                     count++;
                     const cC = v.cpu > 80 ? 'bg-red-500' : (v.cpu > 50 ? 'bg-yellow-500' : 'bg-green-500');
                     const rC = v.ram > 80 ? 'bg-red-500' : (v.ram > 50 ? 'bg-yellow-500' : 'bg-green-500');
 
-                    h += `<div class="glass p-6 card-vm mb-4 border-l-4 border-blue-500">
+                    h += `<div class="glass p-6 mb-4 border-l-4 border-blue-500">
                         <div class="flex justify-between items-center mb-4"><span class="font-black text-blue-400 italic">${v.id}</span><span class="text-[8px] opacity-40 uppercase font-bold">${v.owner}</span></div>
                         <div class="space-y-3 mb-4 text-[9px] font-bold uppercase">
                             <div><div class="flex justify-between mb-1"><span>CPU Usage</span><span>${v.cpu}%</span></div><div class="progress-bar"><div class="progress-fill ${cC}" style="width:${v.cpu}%"></div></div></div>
@@ -165,37 +167,28 @@
                             <p class="flex justify-between"><span>IP:</span> <span class="text-blue-400 font-bold">${v.ip}</span></p>
                             <p class="flex justify-between uppercase"><span>Password:</span> <span class="text-yellow-400 font-bold">ZunRDP@123456</span></p>
                         </div>
-                        <button onclick="killVM('${id}')" id="btn-stop-${id}" class="w-full py-3 bg-red-600/10 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition">Dừng Máy Ngay</button>
+                        <button onclick="killVM('${id}')" id="btn-stop-${id}" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition border border-red-500/30">DỪNG MÁY</button>
                     </div>`;
                 }
                 currentVMCount = count;
-                document.getElementById('vm-list').innerHTML = h || '<p class="text-center opacity-20 py-10 italic font-bold">KHÔNG CÓ MÁY ONLINE</p>';
+                document.getElementById('vm-list').innerHTML = h || '<p class="text-center opacity-20 py-10 italic">KHÔNG CÓ MÁY ONLINE</p>';
                 document.getElementById('vm-count').innerText = `${count} MÁY ONLINE`;
             } catch(e) {}
         }
 
-        // LỆNH TẮT SỬA ĐỔI: GỬI LỆNH STOP VÀO FIREBASE ĐỂ MÁY TỰ TẮT
         async function killVM(vmId) {
-            if(!confirm("Bạn có chắc chắn muốn tắt máy này không?")) return;
+            if(!confirm("Xác nhận tắt máy ảo ngay lập tức?")) return;
             const btn = document.getElementById(`btn-stop-${vmId}`);
-            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> ĐANG TẮT...';
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> ĐANG DỪNG...';
             
             try {
-                // Đánh dấu trạng thái 'killing' để script trên máy ảo tự hủy
-                await fetch(`${API}/vms/${vmId}.json`, { 
-                    method: 'PATCH', 
-                    body: JSON.stringify({ status: 'killing', command: 'stop' }) 
+                // Gửi lệnh stop vào mục commands (Riêng biệt để không bị máy ảo ghi đè)
+                await fetch(`${API}/commands/${vmId}.json`, { 
+                    method: 'PUT', 
+                    body: JSON.stringify({ action: 'stop', time: Date.now() }) 
                 });
-                
-                // Đợi 2 giây cho máy ảo nhận lệnh rồi xóa hẳn khỏi danh sách hiển thị
-                setTimeout(async () => {
-                    await fetch(`${API}/vms/${vmId}.json`, { method:'DELETE' });
-                    fetchVM();
-                    alert("✅ Đã gửi lệnh tắt! Máy ảo sẽ dừng sau vài giây.");
-                }, 2000);
-            } catch(e) {
-                alert("Lỗi khi gửi lệnh dừng!");
-            }
+                alert("✅ Đã gửi lệnh tắt! Máy sẽ dừng sau 5-10 giây.");
+            } catch(e) { alert("Lỗi khi dừng máy!"); }
         }
 
         async function openAdmin() {
@@ -210,7 +203,7 @@
                         <p class="text-[8px] opacity-50 truncate uppercase">Repo: ${users[n].customRepo || 'N/A'}</p>
                         <p class="text-[9px] text-purple-400 font-bold">Limit: ${users[n].maxVM || 1} VM</p>
                     </div>
-                    <button onclick="grant('${n}')" class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg"><i class="fas fa-edit text-xs"></i></button>
+                    <button onclick="grant('${n}')" class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
                 </div>`;
             }
             document.getElementById('user-list').innerHTML = h;
@@ -218,14 +211,14 @@
 
         async function grant(username) {
             const token = prompt(`1. Nhập GITHUB TOKEN cho [${username}]:`); if(!token) return;
-            const repo = prompt(`2. Nhập REPO (Ví dụ: vpsf0605-dev/zunrdp-Cloud):`); if(!repo) return;
-            const limit = prompt(`3. Nhập GIỚI HẠN số lượng VM:`, "1"); if(limit === null) return;
+            const repo = prompt(`2. Nhập REPO (Ví dụ: user/repo):`); if(!repo) return;
+            const limit = prompt(`3. Nhập GIỚI HẠN máy:`, "1"); if(limit === null) return;
             const randomKey = "ZUN-" + Math.floor(Math.random() * 9000 + 1000);
             await fetch(`${API}/users/${username}.json`, { 
                 method:'PATCH', 
                 body: JSON.stringify({ key: randomKey, githubToken: token.trim(), customRepo: repo.trim(), maxVM: parseInt(limit) || 1 }) 
             });
-            alert(`✅ Đã cập nhật xong cho Member: ${username}`);
+            alert(`✅ Cập nhật xong cho: ${username}`);
             openAdmin();
         }
     </script>
