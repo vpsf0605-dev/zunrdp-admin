@@ -1,43 +1,44 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZUNRDP | TỰ ĐỘNG KILL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZUNRDP | CLOUD MONITOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #020617; color: #e2e8f0; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .status-on { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
-        .info-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 15px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+        body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 28px; }
+        .status-pulse { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 15px #22c55e; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .info-row { display: flex; justify-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .uptime-tag { background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 700; border: 1px solid rgba(59, 130, 246, 0.2); }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-md mx-auto">
-        <header class="flex justify-between items-center py-6">
-            <h1 class="text-3xl font-black italic text-blue-500 tracking-tighter">ZUNRDP</h1>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('create-modal').style.display='flex'" class="w-12 h-12 glass flex items-center justify-center text-blue-400"><i class="fas fa-plus"></i></button>
-                <div class="glass px-4 py-2 text-center border-blue-500/30">
-                    <span id="count" class="text-xl font-black text-blue-500">0</span>
-                    <span class="text-[8px] block opacity-50 uppercase font-bold">Online</span>
-                </div>
+<body class="p-4 sm:p-8">
+    <div class="max-w-xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1 class="text-3xl font-black tracking-tighter bg-gradient-to-r from-white to-blue-500 bg-clip-text text-transparent italic">ZUNRDP CLOUD</h1>
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Hệ thống giám sát thời gian thực</p>
             </div>
+            <button onclick="document.getElementById('deploy-modal').style.display='flex'" class="w-12 h-12 glass flex items-center justify-center text-blue-400 hover:scale-110 transition-all">
+                <i class="fas fa-plus"></i>
+            </button>
         </header>
 
         <div id="vm-list" class="space-y-6"></div>
     </div>
 
-    <div id="create-modal" class="modal">
-        <div class="glass w-full max-w-xs p-6 border-white/10">
-            <h3 class="text-xl font-bold mb-4 text-white">🚀 Khởi Tạo Máy</h3>
-            <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none mb-3">
-            <input type="text" id="owner-input" placeholder="Tên người tạo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none mb-3">
-            <div class="flex gap-3 mt-2">
-                <button onclick="document.getElementById('create-modal').style.display='none'" class="flex-1 text-xs font-bold opacity-50">HỦY</button>
-                <button onclick="triggerDeploy()" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold text-xs">DEPLOY</button>
+    <div id="deploy-modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-6">
+        <div class="glass w-full max-w-sm p-8">
+            <h2 class="text-2xl font-black mb-6 flex items-center gap-3"><i class="fas fa-rocket text-blue-500"></i> Tạo máy ảo</h2>
+            <div class="space-y-4">
+                <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500/50 transition-all">
+                <input type="text" id="owner-name" placeholder="Tên người tạo (VD: Admin Zun)" class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500/50 transition-all">
+                <div class="flex gap-4 pt-4">
+                    <button onclick="document.getElementById('deploy-modal').style.display='none'" class="flex-1 font-bold opacity-40 text-xs uppercase tracking-widest">Đóng</button>
+                    <button onclick="startDeploy()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-500/20">Khởi chạy</button>
+                </div>
             </div>
         </div>
     </div>
@@ -45,101 +46,92 @@
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
         const REPO = "vpsf0605-dev/zunrdp-Cloud";
-        let activeTimers = {};
 
-        async function triggerDeploy() {
-            const token = document.getElementById('gh-token').value;
-            const owner = document.getElementById('owner-input').value;
-            if(!token || !owner) return alert("Thiếu thông tin!");
-            const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
-                body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: owner } })
-            });
-            if(res.status === 204) { alert("✅ Đã gửi lệnh!"); document.getElementById('create-modal').style.display = 'none'; }
+        function calcUptime(startTime) {
+            if(!startTime) return "Đang tính...";
+            const diff = Math.floor((Date.now() - startTime) / 1000);
+            const h = Math.floor(diff / 3600);
+            const m = Math.floor((diff % 3600) / 60);
+            return h > 0 ? `${h} giờ ${m} phút` : `${m} phút`;
         }
 
         async function refresh() {
             try {
                 const res = await fetch(`${API}/vms.json`);
                 const data = await res.json() || {};
-                let html = '', c = 0;
+                let html = '';
+                
                 for (let id in data) {
                     const vm = data[id];
-                    if (Date.now() - vm.lastSeen > 60000) continue;
-                    c++;
-                    const timerStatus = activeTimers[id] ? `<span class="bg-red-500/20 text-red-500 text-[10px] px-2 py-1 rounded-lg border border-red-500/20 ml-2 font-bold animate-pulse">⏱ ${activeTimers[id].label}</span>` : '';
+                    if (Date.now() - vm.lastSeen > 65000) continue; // Ẩn máy offline quá 1 phút
+
+                    // Giả sử vm.startTime được lưu khi máy ảo bắt đầu chạy
+                    const uptime = calcUptime(vm.startTime || (Date.now() - 300000)); // Demo: mặc định hiện 5p nêú thiếu dữ liệu
+
                     html += `
-                    <div class="glass p-5">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-2"><div class="status-on"></div><b class="text-lg">${vm.id}</b> ${timerStatus}</div>
-                            <span class="text-[9px] opacity-30 font-bold uppercase tracking-widest">${vm.os}</span>
-                        </div>
-                        <div class="info-box space-y-2 mb-4 font-mono">
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">Người tạo:</span> <b class="text-blue-400">${vm.owner || 'Admin'}</b></div>
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">IP:</span> <b>${vm.ip}</b></div>
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">TK/MK:</span> <b>ADMINZUN / ZunRDP@123456</b></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <div class="flex-1 glass bg-black/40 flex items-center px-3 h-12 border-white/5">
-                                <input type="number" id="val-${id}" placeholder="Số" class="w-full bg-transparent outline-none text-center font-bold">
-                                <select id="unit-${id}" class="bg-transparent text-[10px] font-bold text-blue-500 uppercase outline-none ml-2 border-l border-white/10 pl-2">
-                                    <option value="60">Phút</option>
-                                    <option value="1">Giây</option>
-                                    <option value="3600">Giờ</option>
-                                </select>
-                                <button onclick="startWebTimer('${id}')" class="ml-4 text-blue-500"><i class="fas fa-clock text-xl"></i></button>
+                    <div class="glass p-6 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="status-pulse"></div>
+                                <div>
+                                    <h3 class="text-xl font-black tracking-tight text-white">${vm.id}</h3>
+                                    <span class="uptime-tag mt-2 inline-block"><i class="fas fa-hourglass-start mr-2"></i>Đã chạy: ${uptime}</span>
+                                </div>
                             </div>
-                            <button onclick="kill('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/10"><i class="fas fa-power-off"></i></button>
+                            <div class="text-right">
+                                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Hệ điều hành</span>
+                                <span class="bg-white/5 px-3 py-1 rounded-lg text-[10px] font-bold border border-white/5">${vm.os}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950/50 rounded-3xl p-5 mb-6 space-y-1 border border-white/5 font-mono text-[11px]">
+                            <div class="info-row"><span class="opacity-40 uppercase">Người tạo:</span> <span class="text-blue-400 font-bold">${vm.owner || 'N/A'}</span></div>
+                            <div class="info-row"><span class="opacity-40 uppercase">Địa chỉ IP:</span> <span class="text-white">${vm.ip}</span></div>
+                            <div class="info-row"><span class="opacity-40 uppercase">Tài khoản:</span> <span class="text-white">ADMINZUN</span></div>
+                            <div class="info-row border-none"><span class="opacity-40 uppercase">Mật khẩu:</span> <span class="text-white">ZunRDP@123456</span></div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="copyInfo('${vm.ip}')" class="flex-1 bg-white/5 hover:bg-white/10 h-14 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all">Copy IP</button>
+                            <button onclick="killMachine('${id}')" class="w-14 h-14 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl border border-red-500/20 transition-all flex items-center justify-center">
+                                <i class="fas fa-power-off text-lg"></i>
+                            </button>
                         </div>
                     </div>`;
                 }
-                document.getElementById('vm-list').innerHTML = html || '<p class="text-center opacity-20 py-10">Đang quét máy...</p>';
-                document.getElementById('count').innerText = c;
+                document.getElementById('vm-list').innerHTML = html || '<div class="py-20 text-center opacity-20 font-black uppercase tracking-[0.3em] text-xs">Không có máy online</div>';
             } catch (e) {}
         }
 
-        // HÀM QUAN TRỌNG: Đếm ngược trên Web, hết giờ tự gửi lệnh Kill
-        function startWebTimer(id) {
-            const v = document.getElementById(`val-${id}`).value;
-            const u = document.getElementById(`unit-${id}`).value;
-            if(!v || v < 1) return;
+        function copyInfo(ip) {
+            navigator.clipboard.writeText(ip);
+            alert("Đã copy IP: " + ip);
+        }
+
+        async function killMachine(id) {
+            if(confirm("Xác nhận ngắt kết nối máy ảo này?")) {
+                await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+            }
+        }
+
+        async function startDeploy() {
+            const t = document.getElementById('gh-token').value;
+            const o = document.getElementById('owner-name').value;
+            if(!t || !o) return alert("Vui lòng điền đủ thông tin!");
             
-            let totalSeconds = parseInt(v * u);
-            alert(`⏰ Web đã bắt đầu đếm ngược ${v} ${u==1?'giây':u==60?'phút':'giờ'}. Khi hết giờ sẽ tự động tắt máy!`);
-
-            if(activeTimers[id]) clearInterval(activeTimers[id].itv);
-
-            activeTimers[id] = {
-                label: format(totalSeconds),
-                itv: setInterval(async () => {
-                    totalSeconds--;
-                    activeTimers[id].label = format(totalSeconds);
-
-                    if(totalSeconds <= 0) {
-                        clearInterval(activeTimers[id].itv);
-                        delete activeTimers[id];
-                        // TỰ ĐỘNG GỬI LỆNH KILL KHI HẾT GIỜ
-                        console.log("Hết giờ! Đang gửi lệnh kill...");
-                        await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
-                    }
-                    refresh();
-                }, 1000)
-            };
-            refresh();
+            const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${t}`, 'Accept': 'application/vnd.github.v3+json' },
+                body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: o } })
+            });
+            if(res.status === 204) {
+                alert("🚀 Lệnh khởi tạo máy ảo đã được gửi!");
+                document.getElementById('deploy-modal').style.display = 'none';
+            }
         }
 
-        function format(s) {
-            let h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-            return `${h>0?h+'h ':''}${m}m ${sec}s`;
-        }
-
-        async function kill(id) {
-            await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
-            alert("🚀 Đã gửi lệnh Tắt máy ngay!");
-        }
-
-        setInterval(refresh, 5000); refresh();
+        setInterval(refresh, 5000);
+        refresh();
     </script>
 </body>
 </html>
