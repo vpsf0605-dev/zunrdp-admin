@@ -2,150 +2,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP | ADMIN DASHBOARD</title>
+    <title>ZUNRDP | ADMIN CLOUD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #010409; color: #c9d1d9; }
-        .glass-panel { background: rgba(22, 27, 34, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(48, 54, 61, 0.8); border-radius: 20px; }
-        .vm-card { background: linear-gradient(145deg, #161b22, #0d1117); border: 1px solid #30363d; transition: all 0.3s ease; }
-        .vm-card:hover { border-color: #58a6ff; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .status-online { width: 12px; height: 12px; background: #238636; border-radius: 50%; box-shadow: 0 0 10px #238636; animation: blink 2s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .badge-owner { background: rgba(56, 139, 253, 0.15); color: #58a6ff; padding: 2px 10px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(56, 139, 253, 0.3); }
-        .uptime-text { color: #7d8590; font-size: 12px; font-family: monospace; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #030712; color: #f8fafc; overflow-x: hidden; }
+        
+        /* Hiệu ứng kính và viền sáng */
+        .glass-card { 
+            background: rgba(17, 24, 39, 0.7); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover { border-color: rgba(59, 130, 246, 0.5); transform: translateY(-5px); }
+        
+        /* Chấm Online nhấp nháy */
+        .online-indicator {
+            width: 12px; height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px #10b981;
+        }
+        .online-indicator::after {
+            content: ''; position: absolute; inset: -4px;
+            border-radius: 50%; border: 2px solid #10b981;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* Nút copy & kill */
+        .btn-action { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; transition: all 0.2s; }
+        .btn-action:hover { background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; }
+        .btn-kill { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .btn-kill:hover { background: #ef4444; color: white; }
     </style>
 </head>
-<body class="p-4 sm:p-6 lg:p-10">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-black text-white flex items-center gap-3">
-                    <i class="fas fa-shield-alt text-blue-500"></i> ZUNRDP ADMIN
+<body class="p-4 md:p-10">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-extrabold tracking-tighter italic text-white italic">
+                    ZUNRDP <span class="text-blue-500 not-italic uppercase text-2xl ml-2">Cloud</span>
                 </h1>
-                <p class="text-sm text-slate-500 mt-1">Bảng điều khiển quản lý máy ảo toàn cầu</p>
+                <p class="text-slate-500 text-sm font-semibold mt-2 uppercase tracking-widest">Hệ thống giám sát máy ảo toàn cầu</p>
             </div>
-            <div class="flex gap-4 items-center">
-                <div class="glass-panel px-6 py-3 text-center">
-                    <span class="text-[10px] block opacity-50 font-bold uppercase tracking-widest text-blue-400">Đang chạy</span>
-                    <span id="total-vms" class="text-2xl font-black text-white">0</span>
+            
+            <div class="flex items-center gap-4">
+                <div class="glass-card px-8 py-3 flex flex-col items-center">
+                    <span id="vm-count" class="text-3xl font-black text-blue-500">0</span>
+                    <span class="text-[10px] font-bold opacity-40 uppercase tracking-tighter">Máy Online</span>
                 </div>
-                <button onclick="document.getElementById('modal').style.display='flex'" class="bg-blue-600 hover:bg-blue-500 w-12 h-12 rounded-xl flex items-center justify-center transition-all shadow-lg shadow-blue-900/20">
-                    <i class="fas fa-plus text-white"></i>
+                <button onclick="document.getElementById('deploy-modal').style.display='flex'" class="w-16 h-16 glass-card flex items-center justify-center text-blue-400 text-xl shadow-lg shadow-blue-500/10">
+                    <i class="fas fa-plus"></i>
                 </button>
             </div>
         </div>
 
-        <div id="vm-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div id="vm-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             </div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md p-8 border-slate-700">
-            <h2 class="text-xl font-bold mb-6 text-white"><i class="fas fa-plus-circle mr-2"></i> Deploy Máy Ảo Mới</h2>
+    <div id="deploy-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center p-6">
+        <div class="glass-card w-full max-w-sm p-8 border-white/10 shadow-2xl">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-500 text-xl">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h2 class="text-2xl font-black italic">TẠO MÁY MỚI</h2>
+            </div>
             <div class="space-y-4">
-                <input type="password" id="gh-token" placeholder="Nhập GitHub Token" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-4 py-3 outline-none focus:border-blue-500">
-                <input type="text" id="owner-name" placeholder="Tên người tạo" class="w-full bg-[#0d1117] border border-[#30363d] rounded-xl px-4 py-3 outline-none focus:border-blue-500">
-                <div class="flex gap-4 pt-2">
-                    <button onclick="document.getElementById('modal').style.display='none'" class="flex-1 py-3 font-bold opacity-50">Hủy</button>
-                    <button onclick="deploy()" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold shadow-lg shadow-blue-900/30">Khởi Chạy</button>
+                <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500/50">
+                <input type="text" id="owner-name" placeholder="Tên của bạn (VD: Admin Zun)" class="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-sm outline-none focus:border-blue-500/50">
+                <div class="flex gap-4 pt-6">
+                    <button onclick="document.getElementById('deploy-modal').style.display='none'" class="flex-1 font-bold opacity-30 text-sm">HỦY</button>
+                    <button onclick="startDeploy()" class="flex-1 bg-blue-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20">KHỞI CHẠY</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const REPO = "vpsf0605-dev/zunrdp-Cloud";
-        let timers = {};
+        const API_URL = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const GH_REPO = "vpsf0605-dev/zunrdp-Cloud";
 
-        function formatUptime(start) {
-            if (!start) return "00:00:00";
-            let diff = Math.floor((Date.now() - start) / 1000);
+        function formatUptime(startTime) {
+            if (!startTime) return "00h 00m";
+            let diff = Math.floor((Date.now() - startTime) / 1000);
             let h = Math.floor(diff / 3600);
             let m = Math.floor((diff % 3600) / 60);
             let s = diff % 60;
-            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            return `${h > 0 ? h + 'h ' : ''}${m}m ${s}s`;
         }
 
         async function refresh() {
             try {
-                const res = await fetch(`${API}/vms.json`);
+                const res = await fetch(`${API_URL}/vms.json`);
                 const data = await res.json() || {};
-                const container = document.getElementById('vm-container');
+                const grid = document.getElementById('vm-grid');
                 let html = '', count = 0;
 
                 for (let id in data) {
                     const vm = data[id];
-                    if (Date.now() - vm.lastSeen > 60000) continue;
+                    if (Date.now() - vm.lastSeen > 65000) continue; // Check máy online trong 1 phút
                     count++;
 
                     html += `
-                    <div class="vm-card p-6 rounded-[24px]">
-                        <div class="flex justify-between items-start mb-5">
-                            <div class="flex items-center gap-3">
-                                <div class="status-online"></div>
+                    <div class="glass-card p-6 relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="online-indicator"></div>
                                 <div>
-                                    <h3 class="text-lg font-bold text-white tracking-tight">${vm.id}</h3>
-                                    <span class="badge-owner">By: ${vm.owner || 'Admin'}</span>
+                                    <h3 class="text-xl font-black text-white tracking-tight">${vm.id}</h3>
+                                    <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">
+                                        <i class="fas fa-user-circle mr-1"></i> ${vm.owner || 'Admin'}
+                                    </p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="uptime-text block mb-1">UPTIME</span>
-                                <span class="text-white font-mono font-bold">${formatUptime(vm.startTime)}</span>
+                                <span class="text-[9px] font-black opacity-30 uppercase block">Thời gian chạy</span>
+                                <span class="text-white font-mono font-bold text-sm">${formatUptime(vm.startTime)}</span>
                             </div>
                         </div>
 
-                        <div class="space-y-2 mb-6 bg-black/20 p-4 rounded-xl border border-white/5">
-                            <div class="flex justify-between text-xs"><span class="opacity-40">IP ADDRESS:</span> <span class="text-blue-400 font-bold">${vm.ip}</span></div>
-                            <div class="flex justify-between text-xs"><span class="opacity-40">USER:</span> <span class="text-white">ADMINZUN</span></div>
-                            <div class="flex justify-between text-xs"><span class="opacity-40">PASS:</span> <span class="text-white">ZunRDP@123456</span></div>
+                        <div class="bg-black/40 rounded-2xl p-4 mb-6 space-y-3 border border-white/5">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] opacity-40 font-bold">IP ADDRESS</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-mono font-bold">${vm.ip}</span>
+                                    <button onclick="copy('${vm.ip}')" class="text-blue-500 text-xs"><i class="fas fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center border-t border-white/5 pt-3 text-[10px]">
+                                <span class="opacity-40 font-bold uppercase">User/Pass</span>
+                                <span class="font-bold text-white">ADMINZUN / ZunRDP@123456</span>
+                            </div>
                         </div>
 
-                        <div class="flex gap-2">
-                            <div class="flex-1 flex bg-black/40 rounded-xl px-3 items-center border border-white/10 h-12">
-                                <input type="number" id="v-${id}" placeholder="Hẹn giờ" class="bg-transparent w-full text-center outline-none text-sm font-bold">
-                                <select id="u-${id}" class="bg-transparent text-[10px] font-black uppercase text-blue-500 outline-none">
-                                    <option value="60">M</option>
-                                    <option value="1">S</option>
-                                    <option value="3600">H</option>
-                                </select>
-                            </div>
-                            <button onclick="kill('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
+                        <div class="flex gap-3">
+                            <button onclick="copy('ADMINZUN | ZunRDP@123456')" class="flex-1 h-12 btn-action font-black text-[10px] uppercase tracking-widest">Copy TK/MK</button>
+                            <button onclick="killMachine('${id}')" class="w-12 h-12 btn-action btn-kill flex items-center justify-center transition-all">
                                 <i class="fas fa-power-off"></i>
                             </button>
                         </div>
                     </div>`;
                 }
-                container.innerHTML = html || '<div class="col-span-full py-20 text-center opacity-20 font-bold">KHÔNG CÓ MÁY ONLINE</div>';
-                document.getElementById('total-vms').innerText = count;
+                grid.innerHTML = html || '<div class="col-span-full py-20 text-center opacity-20 font-black italic">Không có máy nào đang chạy...</div>';
+                document.getElementById('vm-count').innerText = count;
             } catch (e) {}
         }
 
-        async function deploy() {
-            const t = document.getElementById('gh-token').value;
-            const o = document.getElementById('owner-name').value;
-            if(!t || !o) return alert("Thiếu thông tin!");
-            const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
-                method: 'POST', headers: { 'Authorization': `Bearer ${t}` },
-                body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: o } })
-            });
-            if(res.ok) { alert("🚀 Đã Deploy!"); document.getElementById('modal').style.display='none'; }
+        function copy(t) { navigator.clipboard.writeText(t); alert("Đã copy: " + t); }
+
+        async function killMachine(id) {
+            if (confirm("Dừng máy này ngay lập tức?")) {
+                await fetch(`${API_URL}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+            }
         }
 
-        async function kill(id) {
-            const v = document.getElementById(`v-${id}`).value;
-            const u = document.getElementById(`u-${id}`).value;
-            let cmd = 'kill';
-            if(v > 0) cmd = `kill_in_${v * u}`;
-            
-            await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify(cmd) });
-            alert(v > 0 ? "⏰ Đã đặt hẹn giờ tắt!" : "🚀 Đã gửi lệnh tắt ngay!");
+        async function startDeploy() {
+            const token = document.getElementById('gh-token').value;
+            const owner = document.getElementById('owner-name').value;
+            const res = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/vm.yml/dispatches`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: owner } })
+            });
+            if (res.ok) {
+                alert("🚀 Lệnh khởi chạy đã được gửi!");
+                document.getElementById('deploy-modal').style.display = 'none';
+            }
         }
 
         setInterval(refresh, 5000); refresh();
-        setInterval(() => refresh(), 1000); // Cập nhật uptime mỗi giây
+        setInterval(() => refresh(), 1000); // Update uptime liên tục
     </script>
 </body>
 </html>
