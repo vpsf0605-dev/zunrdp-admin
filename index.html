@@ -2,7 +2,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZUNRDP | QUẢN TRỊ VIÊN</title>
+    <title>ZUNRDP | TỰ ĐỘNG KILL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -10,7 +10,6 @@
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
         .status-on { width: 10px; height: 10px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 10px #22c55e; }
         .info-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 15px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); }
-        .copy-link { color: #3b82f6; font-weight: bold; cursor: pointer; margin-left: 8px; font-size: 10px; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
     </style>
@@ -35,7 +34,7 @@
         <div class="glass w-full max-w-xs p-6 border-white/10">
             <h3 class="text-xl font-bold mb-4 text-white">🚀 Khởi Tạo Máy</h3>
             <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none mb-3">
-            <input type="text" id="owner-input" placeholder="Tên người tạo (Admin)" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none mb-3">
+            <input type="text" id="owner-input" placeholder="Tên người tạo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none mb-3">
             <div class="flex gap-3 mt-2">
                 <button onclick="document.getElementById('create-modal').style.display='none'" class="flex-1 text-xs font-bold opacity-50">HỦY</button>
                 <button onclick="triggerDeploy()" class="flex-1 bg-blue-600 py-3 rounded-xl font-bold text-xs">DEPLOY</button>
@@ -51,19 +50,13 @@
         async function triggerDeploy() {
             const token = document.getElementById('gh-token').value;
             const owner = document.getElementById('owner-input').value;
-            if(!token || !owner) return alert("Vui lòng nhập đủ thông tin!");
-            
+            if(!token || !owner) return alert("Thiếu thông tin!");
             const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
                 body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: owner } })
             });
-            if(res.status === 204) {
-                alert("✅ Đã gửi lệnh tạo máy thành công!");
-                document.getElementById('create-modal').style.display = 'none';
-            } else {
-                alert("❌ Lỗi! Kiểm tra lại Token hoặc Repo.");
-            }
+            if(res.status === 204) { alert("✅ Đã gửi lệnh!"); document.getElementById('create-modal').style.display = 'none'; }
         }
 
         async function refresh() {
@@ -75,24 +68,18 @@
                     const vm = data[id];
                     if (Date.now() - vm.lastSeen > 60000) continue;
                     c++;
-                    const timerStatus = activeTimers[id] ? `<span class="bg-yellow-500/20 text-yellow-500 text-[10px] px-2 py-1 rounded-lg border border-yellow-500/20 ml-2 font-bold">⏱ ${activeTimers[id].label}</span>` : '';
+                    const timerStatus = activeTimers[id] ? `<span class="bg-red-500/20 text-red-500 text-[10px] px-2 py-1 rounded-lg border border-red-500/20 ml-2 font-bold animate-pulse">⏱ ${activeTimers[id].label}</span>` : '';
                     html += `
                     <div class="glass p-5">
                         <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-2">
-                                <div class="status-on"></div>
-                                <b class="text-lg">${vm.id}</b> ${timerStatus}
-                            </div>
+                            <div class="flex items-center gap-2"><div class="status-on"></div><b class="text-lg">${vm.id}</b> ${timerStatus}</div>
                             <span class="text-[9px] opacity-30 font-bold uppercase tracking-widest">${vm.os}</span>
                         </div>
-                        
                         <div class="info-box space-y-2 mb-4 font-mono">
                             <div class="flex justify-between"><span class="opacity-40 uppercase">Người tạo:</span> <b class="text-blue-400">${vm.owner || 'Admin'}</b></div>
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">IP Máy:</span> <span><b>${vm.ip}</b><span onclick="navigator.clipboard.writeText('${vm.ip}');alert('Đã Copy IP')" class="copy-link">COPY</span></span></div>
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">Tài khoản:</span> <span><b>ADMINZUN</b><span onclick="navigator.clipboard.writeText('ADMINZUN')" class="copy-link">COPY</span></span></div>
-                            <div class="flex justify-between"><span class="opacity-40 uppercase">Mật khẩu:</span> <span><b>ZunRDP@123456</b><span onclick="navigator.clipboard.writeText('ZunRDP@123456')" class="copy-link">COPY</span></span></div>
+                            <div class="flex justify-between"><span class="opacity-40 uppercase">IP:</span> <b>${vm.ip}</b></div>
+                            <div class="flex justify-between"><span class="opacity-40 uppercase">TK/MK:</span> <b>ADMINZUN / ZunRDP@123456</b></div>
                         </div>
-
                         <div class="flex gap-2">
                             <div class="flex-1 glass bg-black/40 flex items-center px-3 h-12 border-white/5">
                                 <input type="number" id="val-${id}" placeholder="Số" class="w-full bg-transparent outline-none text-center font-bold">
@@ -101,31 +88,44 @@
                                     <option value="1">Giây</option>
                                     <option value="3600">Giờ</option>
                                 </select>
-                                <button onclick="sendTimer('${id}')" class="ml-4 text-blue-500"><i class="fas fa-clock text-xl"></i></button>
+                                <button onclick="startWebTimer('${id}')" class="ml-4 text-blue-500"><i class="fas fa-clock text-xl"></i></button>
                             </div>
                             <button onclick="kill('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/10"><i class="fas fa-power-off"></i></button>
                         </div>
                     </div>`;
                 }
-                document.getElementById('vm-list').innerHTML = html || '<p class="text-center opacity-20 py-10 font-bold uppercase text-[10px]">Đang quét máy ảo...</p>';
+                document.getElementById('vm-list').innerHTML = html || '<p class="text-center opacity-20 py-10">Đang quét máy...</p>';
                 document.getElementById('count').innerText = c;
             } catch (e) {}
         }
 
-        async function sendTimer(id) {
+        // HÀM QUAN TRỌNG: Đếm ngược trên Web, hết giờ tự gửi lệnh Kill
+        function startWebTimer(id) {
             const v = document.getElementById(`val-${id}`).value;
             const u = document.getElementById(`unit-${id}`).value;
             if(!v || v < 1) return;
-            const totalSeconds = parseInt(v * u);
-            await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify(`kill_in_${totalSeconds}`) });
-            alert("⏰ Đã đặt hẹn giờ! Máy ảo sẽ tự sập nguồn.");
-            let s = totalSeconds;
+            
+            let totalSeconds = parseInt(v * u);
+            alert(`⏰ Web đã bắt đầu đếm ngược ${v} ${u==1?'giây':u==60?'phút':'giờ'}. Khi hết giờ sẽ tự động tắt máy!`);
+
             if(activeTimers[id]) clearInterval(activeTimers[id].itv);
-            activeTimers[id] = { label: format(s), itv: setInterval(() => {
-                s--; activeTimers[id].label = format(s);
-                if(s<=0) { clearInterval(activeTimers[id].itv); delete activeTimers[id]; }
-                refresh();
-            }, 1000)};
+
+            activeTimers[id] = {
+                label: format(totalSeconds),
+                itv: setInterval(async () => {
+                    totalSeconds--;
+                    activeTimers[id].label = format(totalSeconds);
+
+                    if(totalSeconds <= 0) {
+                        clearInterval(activeTimers[id].itv);
+                        delete activeTimers[id];
+                        // TỰ ĐỘNG GỬI LỆNH KILL KHI HẾT GIỜ
+                        console.log("Hết giờ! Đang gửi lệnh kill...");
+                        await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+                    }
+                    refresh();
+                }, 1000)
+            };
             refresh();
         }
 
@@ -135,7 +135,8 @@
         }
 
         async function kill(id) {
-            if(confirm("Tắt máy ngay lập tức?")) await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+            await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
+            alert("🚀 Đã gửi lệnh Tắt máy ngay!");
         }
 
         setInterval(refresh, 5000); refresh();
