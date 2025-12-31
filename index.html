@@ -1,144 +1,74 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ZUNRDP | CLOUD PANEL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZUNRDP | MONITOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: system-ui, sans-serif; background-color: #020408; color: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #020408 100%); z-index: -1; }
+        body { background: #020408; color: #fff; font-family: sans-serif; }
         .zun-logo { font-weight: 800; font-size: 24px; background: linear-gradient(to right, #fff, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .rdp-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 20px; margin-bottom: 16px; }
-        .btn-action { height: 48px; border-radius: 12px; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; transition: 0.2s; }
-        .btn-action:active { transform: scale(0.95); opacity: 0.8; }
-        .copy-btn { font-size: 10px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.2); font-weight: 700; cursor: pointer; }
-        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+        .card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
+        .owner-tag { background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; }
     </style>
 </head>
-<body class="p-4 pb-10">
-    <div class="bg-overlay"></div>
-
-    <div id="login-screen" class="fixed inset-0 z-[100] bg-[#020408] flex flex-col items-center justify-center p-8 hidden">
-        <div class="zun-logo mb-8 text-4xl">ZUN<span>RDP</span></div>
-        <div class="w-full max-w-sm space-y-4">
-            <input type="text" id="username-input" placeholder="Nhập tên của bạn..." class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 text-center text-lg transition-all">
-            <button onclick="saveUser()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">BẮT ĐẦU QUẢN LÝ</button>
-        </div>
-    </div>
-
-    <div id="main-app" class="max-w-md mx-auto hidden">
-        <header class="flex justify-between items-start mb-8 pt-2">
-            <div>
-                <div class="zun-logo">ZUN<span>RDP</span></div>
-                <p id="display-user" class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1"></p>
-            </div>
-            <button onclick="logout()" class="text-[10px] text-slate-500 font-bold border border-white/5 px-3 py-1 rounded-lg">ĐỔI TÊN</button>
+<body class="p-4">
+    <div class="max-w-md mx-auto">
+        <header class="flex justify-between items-center mb-8">
+            <div class="zun-logo">ZUN<span>RDP</span></div>
+            <div class="text-[10px] text-gray-500 font-bold uppercase">Hệ Thống Cloud</div>
         </header>
 
-        <div id="vm-list" class="space-y-4">
-            <div class="text-center py-20 opacity-20"><i class="fas fa-circle-notch fa-spin text-3xl"></i></div>
+        <div id="list" class="space-y-4">
+            <p class="text-center opacity-20">Đang tải dữ liệu...</p>
         </div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        let currentUser = localStorage.getItem('zun_user');
-
-        function checkAuth() {
-            if (!currentUser) {
-                document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('main-app').classList.add('hidden');
-            } else {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('display-user').innerText = `Admin: ${currentUser}`;
-                refresh();
-                setInterval(refresh, 5000);
-            }
-        }
-
-        function saveUser() {
-            const val = document.getElementById('username-input').value.trim();
-            if (val) {
-                localStorage.setItem('zun_user', val);
-                currentUser = val;
-                checkAuth();
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('zun_user');
-            location.reload();
-        }
-
-        function copy(text, label) {
-            navigator.clipboard.writeText(text);
-            alert(`Đã sao chép ${label}`);
-        }
 
         async function refresh() {
             try {
                 const res = await fetch(`${API}/vms.json`);
                 const data = await res.json();
-                const container = document.getElementById('vm-list');
                 let html = '';
                 
-                for (let id in data) {
+                for(let id in data) {
                     const vm = data[id];
-                    // LỌC CHỈ HIỆN MÁY CỦA NGƯỜI DÙNG ĐANG ĐĂNG NHẬP
-                    if (vm.owner !== currentUser) continue;
-
                     const diff = Math.floor((Date.now() - vm.lastSeen) / 1000);
-                    if (diff > 60) continue;
+                    if(diff > 60) continue; // Chỉ hiện máy online trong vòng 60s
 
-                    html += `
-                    <div class="rdp-card">
-                        <div class="flex justify-between items-start mb-5">
-                            <div class="flex items-center gap-2">
-                                <div class="status-dot"></div>
+                    html += `<div class="card">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
                                 <h3 class="font-bold text-lg">${vm.id}</h3>
+                                <span class="owner-tag">Chủ sở hữu: ${vm.owner}</span>
                             </div>
-                            <div class="text-right">
-                                <p class="text-[8px] font-black text-slate-500 uppercase tracking-tighter">${vm.os === 'Windows' ? 'Windows Server' : 'Ubuntu'}</p>
-                                <p class="text-[8px] text-emerald-400 font-bold mt-0.5">Cập nhật: ${diff}s trước</p>
-                            </div>
+                            <span class="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">${vm.os} ONLINE</span>
                         </div>
-
-                        <div class="bg-black/40 rounded-2xl p-4 mb-5 border border-white/5 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-slate-500 font-bold uppercase">IP: <span class="text-blue-400 text-sm ml-1">${vm.ip}</span></span>
-                                <div class="copy-btn" onclick="copy('${vm.ip}', 'IP')">COPY</div>
-                            </div>
-                            <div class="pt-3 border-t border-white/5 space-y-2">
-                                <div class="flex justify-between items-center text-[11px]">
-                                    <span class="text-slate-400">Tài khoản: <b class="text-white">ADMINZUN</b></span>
-                                    <div class="copy-btn" onclick="copy('ADMINZUN', 'Tài khoản')">COPY</div>
-                                </div>
-                                <div class="flex justify-between items-center text-[11px]">
-                                    <span class="text-slate-400">Mật khẩu: <b class="text-blue-400 font-mono">ZunRDP@123456</b></span>
-                                    <div class="copy-btn" onclick="copy('ZunRDP@123456', 'Mật khẩu')">COPY</div>
-                                </div>
-                            </div>
+                        <div class="bg-black/30 p-4 rounded-xl text-xs space-y-3">
+                            <div class="flex justify-between"><span>IP Address:</span><b class="text-blue-400 font-mono">${vm.ip}</b></div>
+                            <div class="flex justify-between border-t border-white/5 pt-2"><span>User:</span><b>${vm.user}</b></div>
+                            <div class="flex justify-between border-t border-white/5 pt-2"><span>Password:</span><b class="text-blue-400">${vm.pass}</b></div>
                         </div>
-
-                        <div class="flex gap-2">
-                            <button onclick="cmd('${id}', 'restart')" class="btn-action bg-white text-black">KHỞI ĐỘNG LẠI</button>
-                            <button onclick="cmd('${id}', 'kill')" class="btn-action bg-red-500/10 text-red-500 border border-red-500/20">NGẮT MÁY</button>
+                        <div class="flex gap-2 mt-5">
+                            <button onclick="cmd('${id}','restart')" class="w-full bg-white text-black py-2.5 rounded-lg font-bold text-[11px]">KHỞI ĐỘNG LẠI</button>
+                            <button onclick="cmd('${id}','kill')" class="w-full bg-red-500/10 text-red-500 py-2.5 rounded-lg font-bold text-[11px]">NGẮT MÁY</button>
                         </div>
                     </div>`;
                 }
-                container.innerHTML = html || '<p class="text-center py-20 opacity-30 text-xs font-bold">KHÔNG CÓ MÁY NÀO ĐANG CHẠY</p>';
-            } catch (e) {}
+                document.getElementById('list').innerHTML = html || '<p class="text-center opacity-30 py-20">Hiện không có máy ảo nào trực tuyến</p>';
+            } catch(e){}
         }
 
-        async function cmd(id, type) {
-            if(!confirm(`Thực hiện lệnh trên ${id}?`)) return;
-            await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify(type) });
+        async function cmd(id, t) {
+            if(confirm("Xác nhận thực hiện lệnh?")) {
+                await fetch(`${API}/commands/${id}.json`, {method:'PUT', body:JSON.stringify(t)});
+                alert("Đã gửi yêu cầu!");
+            }
         }
 
-        checkAuth();
+        refresh();
+        setInterval(refresh, 5000);
     </script>
 </body>
 </html>
-
