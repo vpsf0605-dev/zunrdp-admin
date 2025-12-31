@@ -1,241 +1,176 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP | PREMIUM CLOUD</title>
+    <title>ZUNRDP | INTERNAL TOKEN SYSTEM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #010413; color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #010413; color: #f8fafc; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
-        .btn-glow:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); transform: translateY(-2px); }
-        input { background: rgba(0,0,0,0.3) !important; border: 1px solid rgba(255,255,255,0.1) !important; transition: 0.3s; }
-        input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+        .creation-box { border-left: 10px solid #3b82f6; box-shadow: 0 20px 50px rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
-    <div id="auth-gate" class="min-h-[85vh] flex items-center justify-center">
-        <div class="glass p-10 w-full max-w-sm">
-            <h1 class="text-3xl font-black italic text-center mb-10 tracking-tighter">ZUNRDP <span class="text-blue-500">CLOUD</span></h1>
-            
-            <div id="login-box" class="space-y-5">
-                <input type="text" id="user-login" placeholder="Tên tài khoản" class="w-full p-4 rounded-2xl outline-none">
-                <input type="password" id="pass-login" placeholder="Mật khẩu" class="w-full p-4 rounded-2xl outline-none">
-                <button onclick="doLogin()" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest btn-glow transition">Đăng Nhập</button>
-                <button onclick="toggleAuth(true)" class="w-full text-[10px] font-bold opacity-40 uppercase">Chưa có tài khoản? Đăng ký</button>
-            </div>
-
-            <div id="reg-box" class="space-y-5 hidden">
-                <input type="text" id="user-reg" placeholder="Tên muốn đăng ký" class="w-full p-4 rounded-2xl outline-none">
-                <input type="password" id="pass-reg" placeholder="Mật khẩu mới" class="w-full p-4 rounded-2xl outline-none">
-                <button onclick="doRegister()" class="w-full bg-indigo-600 py-4 rounded-2xl font-black uppercase tracking-widest btn-glow transition">Tạo Tài Khoản</button>
-                <button onclick="toggleAuth(false)" class="w-full text-[10px] font-bold opacity-40 uppercase">Đã có tài khoản? Đăng nhập</button>
-            </div>
+    <div id="auth-gate" class="min-h-[80vh] flex items-center justify-center">
+        <div class="glass p-10 w-full max-w-sm text-center">
+            <h1 class="text-3xl font-black mb-8 italic">ZUNRDP <span class="text-blue-500">CLOUD</span></h1>
+            <input type="text" id="user-in" placeholder="Tên tài khoản" class="w-full p-4 mb-4 bg-black/40 border border-white/10 rounded-2xl outline-none">
+            <input type="password" id="pass-in" placeholder="Mật khẩu" class="w-full p-4 mb-6 bg-black/40 border border-white/10 rounded-2xl outline-none">
+            <button onclick="login()" class="w-full bg-blue-600 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-500 transition">Vào Hệ Thống</button>
         </div>
     </div>
 
-    <div id="main-ui" class="hidden max-w-5xl mx-auto">
-        <header class="flex justify-between items-center mb-12">
+    <div id="dashboard" class="hidden max-w-5xl mx-auto">
+        <header class="flex justify-between items-center mb-10">
             <div>
-                <h2 id="user-display" class="text-3xl font-black italic tracking-tighter text-white uppercase">XIN CHÀO</h2>
-                <div id="status-badge" class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span id="role-text" class="text-[9px] font-black uppercase text-blue-400 tracking-widest">Thành viên</span>
-                </div>
+                <h2 id="user-display" class="text-3xl font-black italic uppercase"></h2>
+                <span class="text-[10px] text-blue-400 font-bold tracking-widest bg-blue-500/10 px-3 py-1 rounded-full">THÀNH VIÊN ĐÃ XÁC MINH</span>
             </div>
-            <div class="flex gap-4">
-                <button id="admin-panel-btn" onclick="openAdmin()" class="hidden w-14 h-14 glass flex items-center justify-center text-yellow-500 text-xl"><i class="fas fa-crown"></i></button>
-                <button onclick="location.reload()" class="w-14 h-14 glass flex items-center justify-center text-red-500 text-xl"><i class="fas fa-power-off"></i></button>
-            </div>
+            <button id="adm-btn" onclick="openAdmin()" class="hidden w-14 h-14 glass text-yellow-500 text-xl flex items-center justify-center"><i class="fas fa-crown"></i></button>
         </header>
 
-        <div id="creation-zone" class="hidden glass p-8 mb-12 border-l-[12px] border-blue-600 shadow-2xl shadow-blue-900/20">
-            <div class="flex items-center gap-3 mb-6 text-blue-500">
-                <i class="fas fa-shield-virus text-2xl"></i>
-                <h3 class="font-black uppercase italic tracking-widest text-sm">Xác thực Token để khởi tạo VM</h3>
+        <div id="create-section" class="hidden glass p-8 mb-10 creation-box">
+            <div class="flex items-center gap-3 mb-6">
+                <i class="fas fa-key text-blue-500"></i>
+                <h3 class="font-black uppercase text-sm tracking-widest">Xác thực Token nội bộ để tạo máy</h3>
             </div>
             <div class="flex flex-col md:flex-row gap-4">
-                <input type="password" id="gh-token-input" placeholder="Nhập chính xác GitHub Token của bạn" class="flex-1 p-5 rounded-2xl font-mono text-sm">
-                <button onclick="startProvision()" id="btn-provision" class="bg-blue-600 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] btn-glow transition">Tạo Windows VM</button>
+                <input type="text" id="internal-token" placeholder="Nhập mã Token Admin cấp cho bạn" class="flex-1 p-5 bg-black/40 border border-white/10 rounded-2xl outline-none text-blue-400 font-bold">
+                <button onclick="deployWithToken()" id="btn-run" class="bg-blue-600 px-10 py-5 rounded-2xl font-black text-xs uppercase hover:bg-blue-500 transition">Khởi Tạo Windows</button>
             </div>
-            <p class="text-[10px] opacity-30 mt-4 font-bold uppercase italic">Hệ thống sẽ tự động đối soát Token và gán máy vào ID của bạn.</p>
         </div>
 
         <div id="vm-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
     </div>
 
-    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-[100] hidden p-6 backdrop-blur-xl">
-        <div class="max-w-3xl mx-auto h-full flex flex-col">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-4xl font-black italic tracking-tighter">ADMIN <span class="text-yellow-500">CONTROL</span></h2>
-                <button onclick="closeAdmin()" class="w-14 h-14 glass flex items-center justify-center text-red-500"><i class="fas fa-times text-2xl"></i></button>
+    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-[100] hidden p-6 overflow-y-auto">
+        <div class="max-w-3xl mx-auto">
+            <div class="flex justify-between items-center mb-10 text-white">
+                <h2 class="text-3xl font-black">QUẢN LÝ TOKEN</h2>
+                <button onclick="closeAdmin()" class="text-red-500 text-3xl"><i class="fas fa-times"></i></button>
             </div>
-            <div id="user-manager" class="flex-1 overflow-y-auto space-y-4 pr-2"></div>
+            <div id="user-list" class="space-y-4"></div>
         </div>
     </div>
 
     <script>
-        const DB = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const GITHUB_REPO = "vpsf0605-dev/zunrdp-Cloud";
-        let me = null;
+        const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const REPO = "vpsf0605-dev/zunrdp-Cloud";
+        const MASTER_GH_TOKEN = "YOUR_ADMIN_GITHUB_TOKEN"; // QUAN TRỌNG: Dán Token GitHub của bạn vào đây
 
-        function toggleAuth(isReg) {
-            document.getElementById('login-box').style.display = isReg ? 'none' : 'block';
-            document.getElementById('reg-box').style.display = isReg ? 'block' : 'none';
-        }
+        let session = null;
 
-        // --- HỆ THỐNG TÀI KHOẢN ---
-        async function doRegister() {
-            const u = document.getElementById('user-reg').value.trim();
-            const p = document.getElementById('pass-reg').value.trim();
-            if(!u || !p) return alert("Vui lòng điền đủ!");
-            
-            const exists = await fetch(`${DB}/users/${u}.json`).then(r => r.json());
-            if(exists) return alert("Tên này đã có người dùng rồi!");
-
-            await fetch(`${DB}/users/${u}.json`, {
-                method: 'PUT',
-                body: JSON.stringify({ password: p, canCreate: false, isBanned: false })
-            });
-            alert("Đăng ký xong! Hãy báo Admin ZunRdp cấp quyền tạo máy.");
-            toggleAuth(false);
-        }
-
-        async function doLogin() {
-            const u = document.getElementById('user-login').value.trim();
-            const p = document.getElementById('pass-login').value.trim();
-
+        async function login() {
+            const u = document.getElementById('user-in').value;
+            const p = document.getElementById('pass-in').value;
             if(u === "ZunRdp" && p === "26082007ngoc") {
-                me = { id: u, role: 'admin', canCreate: true };
+                session = { id: u, role: 'admin' };
             } else {
-                const data = await fetch(`${DB}/users/${u}.json`).then(r => r.json());
-                if(data && data.password === p) {
-                    if(data.isBanned) return alert("Tài khoản này bị trục xuất (BANNED)!");
-                    me = { id: u, role: 'user', ...data };
-                } else return alert("Sai tài khoản hoặc mật khẩu!");
+                const data = await fetch(`${API}/users/${u}.json`).then(r => r.json());
+                if(data && data.password === p && !data.isBanned) session = { id: u, role: 'user', ...data };
+                else return alert("Sai tài khoản hoặc bị BAN!");
             }
-            enterDashboard();
+            showUI();
         }
 
-        function enterDashboard() {
+        function showUI() {
             document.getElementById('auth-gate').classList.add('hidden');
-            document.getElementById('main-ui').classList.remove('hidden');
-            document.getElementById('user-display').innerText = `XIN CHÀO, ${me.id}`;
-            
-            if(me.role === 'admin') {
-                document.getElementById('admin-panel-btn').classList.remove('hidden');
-                document.getElementById('role-text').innerText = "Hệ thống tối cao";
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('user-display').innerText = `XIN CHÀO, ${session.id}`;
+            if(session.role === 'admin') document.getElementById('adm-btn').classList.remove('hidden');
+            if(session.canCreate) document.getElementById('create-section').classList.remove('hidden');
+            setInterval(fetchVMs, 3000);
+        }
+
+        // --- CƠ CHẾ TẠO VM BẰNG TOKEN NỘI BỘ ---
+        async function deployWithToken() {
+            const inputToken = document.getElementById('internal-token').value.trim();
+            const btn = document.getElementById('btn-run');
+
+            // 1. Kiểm tra mã Token nhập vào có đúng với Token trong DB của User không
+            if(inputToken !== session.internalToken) {
+                return alert("Mã Token không hợp lệ hoặc không đúng với tài khoản này!");
             }
-            if(me.canCreate) document.getElementById('creation-zone').classList.remove('hidden');
-            
-            setInterval(updateVMs, 3000);
+
+            btn.disabled = true; btn.innerText = "ĐANG XỬ LÝ...";
+
+            // 2. Nếu khớp, dùng Token của Admin để gọi GitHub tạo máy cho thành viên
+            const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${MASTER_GH_TOKEN}` },
+                body: JSON.stringify({ 
+                    ref: 'main', 
+                    inputs: { machine_name: 'Windows', owner_name: session.id } 
+                })
+            });
+
+            if(res.ok) alert("🚀 Thành công! Máy ảo đang được khởi tạo cho: " + session.id);
+            else alert("Lỗi GitHub! Admin hãy kiểm tra lại MASTER_GH_TOKEN.");
+            btn.disabled = false; btn.innerText = "KHỞI TẠO WINDOWS";
         }
 
-        // --- TẠO VM VÀ XÁC THỰC TOKEN ---
-        async function startProvision() {
-            const token = document.getElementById('gh-token-input').value;
-            const btn = document.getElementById('btn-provision');
-            if(!token) return alert("Bạn chưa nhập GitHub Token!");
-            
-            btn.disabled = true; btn.innerText = "ĐANG XÁC THỰC...";
-
-            try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/actions/workflows/vm.yml/dispatches`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github.v3+json' },
-                    body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: me.id } })
-                });
-
-                if(res.status === 204) alert("✅ Token chính xác! Máy đang được khởi tạo cho tài khoản: " + me.id);
-                else alert("❌ Token sai hoặc không có quyền truy cập GitHub Repo này!");
-            } catch(e) { alert("Lỗi kết nối GitHub!"); }
-            finally { btn.disabled = false; btn.innerText = "TẠO WINDOWS VM"; }
-        }
-
-        // --- HIỂN THỊ VM & BIỂU ĐỒ ---
-        async function updateVMs() {
-            const data = await fetch(`${DB}/vms.json`).then(r => r.json()) || {};
+        async function fetchVMs() {
+            const data = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
             let html = '';
             for(let id in data) {
                 const vm = data[id];
-                if(me.role !== 'admin' && vm.owner !== me.id) continue;
+                if(session.role !== 'admin' && vm.owner !== session.id) continue;
                 if(Date.now() - vm.lastSeen > 60000) continue;
-
                 html += `
-                <div class="glass p-8 border-l-[6px] border-blue-500">
-                    <div class="flex justify-between items-start mb-8">
-                        <div>
-                            <h4 class="text-2xl font-black text-white tracking-tighter">${vm.id}</h4>
-                            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">Chủ máy: ${vm.owner}</p>
+                <div class="glass p-8 border-l-4 border-blue-500">
+                    <div class="flex justify-between mb-6">
+                        <h4 class="text-xl font-black">${vm.id}</h4>
+                        <span class="text-xs font-bold text-blue-400 uppercase">Chủ: ${vm.owner}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-black/20 p-4 rounded-2xl">
+                            <p class="text-[10px] opacity-40 mb-2">CPU USAGE</p>
+                            <div class="h-1 bg-white/10 rounded-full"><div class="bg-blue-500 h-full" style="width:${vm.cpu}%"></div></div>
                         </div>
-                        <div class="bg-blue-500/10 px-4 py-2 rounded-2xl border border-blue-500/20 text-center">
-                            <span class="text-[8px] opacity-40 uppercase font-black block">Uptime</span>
-                            <span class="text-xs font-mono font-bold text-blue-400">${Math.floor((Date.now()-vm.startTime)/60000)}p</span>
+                        <div class="bg-black/20 p-4 rounded-2xl">
+                            <p class="text-[10px] opacity-40 mb-2">RAM USAGE</p>
+                            <div class="h-1 bg-white/10 rounded-full"><div class="bg-green-500 h-full" style="width:${vm.ram}%"></div></div>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-6 mb-8">
-                        <div class="bg-black/40 p-5 rounded-3xl border border-white/5">
-                            <div class="flex justify-between text-[10px] font-black mb-3 uppercase opacity-40"><span>CPU</span><span>${vm.cpu}%</span></div>
-                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="bg-blue-500 h-full transition-all duration-1000" style="width:${vm.cpu}%"></div></div>
-                        </div>
-                        <div class="bg-black/40 p-5 rounded-3xl border border-white/5">
-                            <div class="flex justify-between text-[10px] font-black mb-3 uppercase opacity-40"><span>RAM</span><span>${vm.ram}%</span></div>
-                            <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="bg-green-500 h-full transition-all duration-1000" style="width:${vm.ram}%"></div></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-black/50 p-5 rounded-3xl text-xs font-bold space-y-3 mb-8 border border-white/5">
-                        <div class="flex justify-between"><span class="opacity-30 uppercase tracking-tighter text-[10px]">Địa chỉ IP:</span><span class="text-blue-400 font-mono">${vm.ip}</span></div>
-                        <div class="flex justify-between border-t border-white/5 pt-3"><span class="opacity-30 uppercase tracking-tighter text-[10px]">Tài khoản:</span><span class="text-white">ADMINZUN / ZunRDP@123456</span></div>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button onclick="navigator.clipboard.writeText('${vm.ip}')" class="flex-1 h-14 glass hover:bg-white/5 text-xs font-black uppercase tracking-widest transition">Copy IP</button>
-                        <button onclick="killMachine('${id}')" class="w-14 h-14 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-600 hover:text-white transition flex items-center justify-center"><i class="fas fa-power-off"></i></button>
+                    <div class="bg-black/40 p-4 rounded-2xl text-xs font-mono space-y-2">
+                        <p>IP: <span class="text-blue-400">${vm.ip}</span></p>
+                        <p>User/Pass: ADMINZUN / ZunRDP@123456</p>
                     </div>
                 </div>`;
             }
-            document.getElementById('vm-grid').innerHTML = html || '<div class="col-span-2 text-center py-24 opacity-20 italic font-bold">KHÔNG CÓ MÁY NÀO ONLINE.</div>';
+            document.getElementById('vm-grid').innerHTML = html;
         }
 
-        // --- ADMIN PANEL ---
         async function openAdmin() {
             document.getElementById('admin-modal').classList.remove('hidden');
-            const users = await fetch(`${DB}/users.json`).then(r => r.json()) || {};
+            const users = await fetch(`${API}/users.json`).then(r => r.json()) || {};
             let html = '';
             for(let name in users) {
                 const u = users[name];
                 html += `
-                <div class="glass p-6 flex justify-between items-center ${u.isBanned ? 'border-red-500 bg-red-500/5' : 'border-green-500 bg-green-500/5'} border-l-8">
+                <div class="glass p-6 flex justify-between items-center bg-white/5 border-l-4 ${u.isBanned ? 'border-red-500':'border-green-500'}">
                     <div>
-                        <p class="text-xl font-black text-white">${name}</p>
-                        <p class="text-[9px] font-bold ${u.canCreate ? 'text-green-400' : 'text-gray-500'} uppercase">Quyền tạo: ${u.canCreate ? 'ĐÃ CẤP' : 'CHƯA CÓ'}</p>
+                        <p class="font-black text-xl">${name}</p>
+                        <p class="text-[10px] text-blue-400">TOKEN HIỆN TẠI: <span class="bg-blue-500/20 px-2 rounded">${u.internalToken || 'CHƯA CẤP'}</span></p>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="modUser('${name}', {canCreate: !${u.canCreate}})" class="px-6 py-3 glass text-[10px] font-black uppercase ${u.canCreate ? 'text-orange-400' : 'text-green-400'}">Cấp quyền</button>
-                        <button onclick="modUser('${name}', {isBanned: !${u.isBanned}})" class="w-12 h-12 glass ${u.isBanned ? 'text-green-500' : 'text-red-500'} flex items-center justify-center"><i class="fas ${u.isBanned ? 'fa-user-check' : 'fa-user-slash'}"></i></button>
+                    <div class="flex gap-2 text-[10px] font-bold">
+                        <button onclick="grantToken('${name}')" class="bg-blue-600 px-4 py-2 rounded-xl uppercase">Cấp Token & Quyền</button>
+                        <button onclick="ban('${name}')" class="bg-red-600 px-4 py-2 rounded-xl uppercase">Ban</button>
                     </div>
                 </div>`;
             }
-            document.getElementById('user-manager').innerHTML = html;
+            document.getElementById('user-list').innerHTML = html;
         }
 
-        async function modUser(name, props) {
-            await fetch(`${DB}/users/${name}.json`, { method: 'PATCH', body: JSON.stringify(props) });
-            if(props.isBanned) {
-                const vms = await fetch(`${DB}/vms.json`).then(r => r.json());
-                for(let id in vms) if(vms[id].owner === name) killMachine(id);
-            }
+        async function grantToken(name) {
+            const newToken = "ZUN-" + Math.floor(Math.random() * 9000 + 1000);
+            await fetch(`${API}/users/${name}.json`, { 
+                method: 'PATCH', 
+                body: JSON.stringify({ canCreate: true, internalToken: newToken }) 
+            });
+            alert("Đã cấp Token: " + newToken + " cho " + name);
             openAdmin();
-        }
-
-        async function killMachine(id) {
-            if(confirm("Hành động này sẽ tắt máy ảo ngay lập tức. Tiếp tục?")) {
-                await fetch(`${DB}/vms/${id}.json`, { method: 'PATCH', body: JSON.stringify({ command: 'kill' }) });
-            }
         }
 
         function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
