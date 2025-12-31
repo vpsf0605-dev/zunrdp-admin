@@ -2,124 +2,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZUNRDP | ADMIN</title>
+    <title>ZUNRDP | PREMIUM ADMIN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #020408; color: #fff; font-family: sans-serif; }
-        .zun-logo { font-weight: 800; font-size: 24px; background: linear-gradient(to right, #fff, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .card { background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
-        .owner-tag { background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; }
-        .copy-btn { font-size: 10px; color: #60a5fa; cursor: pointer; font-weight: bold; text-transform: uppercase; border: 1px solid rgba(96, 165, 250, 0.3); padding: 2px 6px; border-radius: 4px; }
-        .copy-btn:active { background: #3b82f6; color: #fff; }
+        body { 
+            background: #0a0c10; 
+            color: #f8fafc; 
+            font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, #0a0c10 100%);
+            min-height: 100vh;
+        }
+        .zun-logo { 
+            font-weight: 800; font-size: 26px; 
+            background: linear-gradient(135deg, #fff 0%, #3b82f6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        .card { 
+            background: rgba(30, 41, 59, 0.3); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 24px; 
+            padding: 24px; 
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+        }
+        .owner-tag { 
+            background: rgba(59, 130, 246, 0.1); 
+            color: #60a5fa; 
+            padding: 4px 12px; 
+            border-radius: 10px; 
+            font-size: 11px; 
+            font-weight: 700;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .copy-btn { 
+            font-size: 10px; color: #94a3b8; cursor: pointer; font-weight: 800; 
+            text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); 
+            padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,0.03);
+            transition: all 0.2s;
+        }
+        .copy-btn:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+        
+        #search-container {
+            display: flex; align-items: center; background: rgba(255,255,255,0.05);
+            border-radius: 14px; padding: 0 12px; border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s; width: 40px; overflow: hidden;
+        }
+        #search-container.active { width: 200px; background: rgba(255,255,255,0.1); border-color: rgba(59, 130, 246, 0.4); }
+        #search-input { background: transparent; border: none; color: white; outline: none; font-size: 13px; width: 100%; margin-left: 10px; }
+        
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 8px #10b981; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-6">
     <div class="max-w-md mx-auto">
-        <header class="flex justify-between items-center mb-8">
+        <header class="flex justify-between items-center mb-10">
             <div>
                 <div class="zun-logo">ZUN<span>RDP</span></div>
-                <div class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Hệ Thống Cloud</div>
+                <div class="text-[9px] text-slate-500 font-bold uppercase tracking-[3px]">Cloud Infrastructure</div>
             </div>
-            <div class="text-right">
-                <span id="node-count" class="text-xl font-bold text-blue-400">0</span>
-                <p class="text-[8px] text-gray-500 font-bold uppercase">Online</p>
+            
+            <div class="flex items-center gap-3">
+                <div id="search-container">
+                    <i class="fas fa-search text-slate-400 cursor-pointer" onclick="document.getElementById('search-container').classList.toggle('active'); document.getElementById('search-input').focus();"></i>
+                    <input type="text" id="search-input" placeholder="Tìm ID, Chủ máy...">
+                </div>
+
+                <div class="bg-blue-600/10 border border-blue-500/20 px-4 py-1.5 rounded-2xl text-center">
+                    <span id="node-count" class="text-xl font-black text-blue-400">0</span>
+                    <span class="text-[8px] text-blue-400/60 font-black uppercase block -mt-1">Nodes</span>
+                </div>
             </div>
         </header>
 
-        <div id="list" class="space-y-4">
-            <p class="text-center opacity-20 py-20"><i class="fas fa-circle-notch fa-spin text-2xl"></i></p>
+        <div id="list" class="space-y-5">
+            <div class="text-center py-20 opacity-20"><i class="fas fa-circle-notch fa-spin text-3xl"></i></div>
         </div>
     </div>
 
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 hidden">
-        <div class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-xs shadow-lg"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-white text-black px-6 py-3 rounded-2xl font-bold text-xs shadow-2xl flex items-center gap-2">
+            <i class="fas fa-check-circle text-blue-600"></i> <span id="toast-msg"></span>
+        </div>
     </div>
 
     <script>
         const API_URL = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
+        let currentData = {};
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.firstElementChild.innerText = msg;
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('hidden'), 2000);
+            document.getElementById('toast-msg').innerText = msg;
+            t.classList.replace('opacity-0', 'opacity-100');
+            setTimeout(() => t.classList.replace('opacity-100', 'opacity-0'), 2000);
         }
 
         function copy(text, label) {
             navigator.clipboard.writeText(text);
-            showToast(`Đã chép ${label}`);
+            showToast(`Đã sao chép ${label}`);
         }
 
-        async function refresh() {
+        async function fetchData() {
             try {
                 const res = await fetch(`${API_URL}/vms.json`);
-                const data = await res.json();
-                let html = '';
-                let count = 0;
-                
-                for(let id in data) {
-                    const vm = data[id];
-                    const diff = Math.floor((Date.now() - vm.lastSeen) / 1000);
-                    if(diff > 60) continue; // Ẩn máy nếu offline quá 60s
-                    count++;
-
-                    html += `<div class="card">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-lg text-blue-400 font-mono">${vm.id}</h3>
-                                <span class="owner-tag"><i class="fas fa-user mr-1"></i> ${vm.owner || 'Chưa rõ'}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold uppercase">${vm.os}</span>
-                                <p class="text-[8px] text-gray-500 mt-1 italic">${diff}s trước</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-black/30 p-4 rounded-xl text-xs space-y-3 border border-white/5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400">IP Address:</span>
-                                <div class="flex items-center gap-2">
-                                    <b class="text-white font-mono">${vm.ip}</b>
-                                    <span class="copy-btn" onclick="copy('${vm.ip}', 'IP')">Copy</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center border-t border-white/5 pt-2">
-                                <span class="text-gray-400">User:</span>
-                                <div class="flex items-center gap-2">
-                                    <b class="text-white font-mono">ADMINZUN</b>
-                                    <span class="copy-btn" onclick="copy('ADMINZUN', 'User')">Copy</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center border-t border-white/5 pt-2">
-                                <span class="text-gray-400">Password:</span>
-                                <div class="flex items-center gap-2">
-                                    <b class="text-blue-400 font-mono">ZunRDP@123456</b>
-                                    <span class="copy-btn" onclick="copy('ZunRDP@123456', 'Pass')">Copy</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-2 mt-5">
-                            <button onclick="sendCmd('${id}','restart')" class="w-1/2 bg-white text-black py-2.5 rounded-lg font-bold text-[11px] active:scale-95 transition-transform">RESTART</button>
-                            <button onclick="sendCmd('${id}','kill')" class="w-1/2 bg-red-500/10 text-red-500 border border-red-500/20 py-2.5 rounded-lg font-bold text-[11px] active:scale-95 transition-transform">STOP VM</button>
-                        </div>
-                    </div>`;
-                }
-                document.getElementById('list').innerHTML = html || '<p class="text-center opacity-30 py-20">Hiện không có máy online</p>';
-                document.getElementById('node-count').innerText = count;
+                currentData = await res.json() || {};
+                renderList();
             } catch(e){}
         }
 
-        async function sendCmd(id, t) {
-            if(confirm(`Xác nhận thực hiện lệnh trên máy ${id}?`)) {
-                await fetch(`${API_URL}/commands/${id}.json`, {method:'PUT', body:JSON.stringify(t)});
-                showToast("Đã gửi lệnh!");
+        function renderList() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const container = document.getElementById('list');
+            let html = '';
+            let count = 0;
+            
+            for(let id in currentData) {
+                const vm = currentData[id];
+                const diff = Math.floor((Date.now() - vm.lastSeen) / 1000);
+                if(diff > 60) continue;
+                
+                if(query && !vm.id.toLowerCase().includes(query) && !(vm.owner && vm.owner.toLowerCase().includes(query))) continue;
+                
+                count++;
+                html += `
+                <div class="card">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <div class="flex items-center mb-2">
+                                <span class="status-dot"></span>
+                                <h3 class="font-extrabold text-xl tracking-tight">${vm.id}</h3>
+                            </div>
+                            <span class="owner-tag"><i class="far fa-user-circle mr-1"></i> ${vm.owner || 'System'}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] bg-white/5 border border-white/10 text-slate-300 px-3 py-1 rounded-lg font-bold uppercase tracking-wider">${vm.os}</span>
+                            <p class="text-[9px] text-slate-500 mt-2 font-semibold tracking-tighter">Active: ${diff}s ago</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/40 rounded-3xl p-5 mb-6 border border-white/[0.03] space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">IP Address</span>
+                            <div class="flex items-center gap-3">
+                                <b class="text-sm font-mono text-blue-400">${vm.ip}</b>
+                                <span class="copy-btn" onclick="copy('${vm.ip}', 'IP')">Copy</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">User</span>
+                            <div class="flex items-center gap-3">
+                                <b class="text-sm font-semibold text-slate-200">ADMINZUN</b>
+                                <span class="copy-btn" onclick="copy('ADMINZUN', 'User')">Copy</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-white/5">
+                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Password</span>
+                            <div class="flex items-center gap-3">
+                                <b class="text-sm font-mono text-blue-400">ZunRDP@123456</b>
+                                <span class="copy-btn" onclick="copy('ZunRDP@123456', 'Pass')">Copy</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="sendCmd('${id}','restart')" class="flex-1 bg-white text-black py-3.5 rounded-2xl font-bold text-xs hover:bg-slate-200 transition-all active:scale-95 shadow-xl shadow-white/5">
+                            <i class="fas fa-redo-alt mr-2"></i> RESTART
+                        </button>
+                        <button onclick="sendCmd('${id}','kill')" class="flex-1 bg-red-500/10 text-red-500 border border-red-500/20 py-3.5 rounded-2xl font-bold text-xs hover:bg-red-500/20 transition-all active:scale-95">
+                            <i class="fas fa-power-off mr-2"></i> TERMINATE
+                        </button>
+                    </div>
+                </div>`;
             }
+            container.innerHTML = html || '<div class="text-center py-20 opacity-30 text-xs font-bold uppercase tracking-[4px]">No active nodes</div>';
+            document.getElementById('node-count').innerText = count;
         }
 
-        refresh();
-        setInterval(refresh, 5000);
+        async function sendCmd(id, t) {
+            if(!confirm(`Xác nhận thực hiện lệnh ${t.toUpperCase()} trên máy ${id}?`)) return;
+            await fetch(`${API_URL}/commands/${id}.json`, {method:'PUT', body:JSON.stringify(t)});
+            showToast("Lệnh đã được gửi!");
+        }
+
+        document.getElementById('search-input').addEventListener('input', renderList);
+        fetchData();
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>
