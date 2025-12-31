@@ -2,139 +2,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP | ADMIN CLOUD</title>
+    <title>ZUNRDP | CLOUD ULTIMATE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; min-height: 100vh;
-            background-image: radial-gradient(at 0% 0%, rgba(30, 64, 175, 0.1) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
-        }
-        .glass-card { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .status-pulse { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 15px #10b981; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; min-height: 100vh; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; }
+        .bg-mesh { background-image: radial-gradient(at 0% 0%, rgba(30, 64, 175, 0.2) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%); }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="bg-mesh p-4 md:p-8">
 
-    <div class="max-w-2xl mx-auto">
+    <div id="login-page" class="min-h-[80vh] flex items-center justify-center">
+        <div class="glass p-10 w-full max-w-sm text-center">
+            <h1 class="text-3xl font-black italic mb-8">ZUNRDP <span class="text-blue-500">CLOUD</span></h1>
+            <div class="space-y-4">
+                <input type="text" id="user-in" placeholder="Username" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl outline-none focus:border-blue-500">
+                <input type="password" id="pass-in" placeholder="Password" class="w-full bg-black/40 border border-white/10 p-4 rounded-2xl outline-none focus:border-blue-500">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-2xl font-black uppercase tracking-widest transition shadow-lg shadow-blue-900/20">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden max-w-4xl mx-auto">
         <header class="flex justify-between items-center mb-10">
             <div>
-                <h1 class="text-3xl font-black italic">ZUNRDP <span class="text-blue-500">CLOUD</span></h1>
-                <p class="text-[9px] uppercase tracking-[0.3em] font-bold opacity-40">Admin Dashboard v2.0</p>
+                <h2 id="hello-user" class="text-2xl font-black italic text-white">WELCOME</h2>
+                <span id="role-tag" class="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full uppercase tracking-widest">User</span>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="glass-card px-5 py-2 flex flex-col items-center">
-                    <span id="total-vms" class="text-xl font-black text-blue-500">0</span>
-                    <span class="text-[8px] font-bold opacity-50 uppercase">Online</span>
-                </div>
-                <button onclick="document.getElementById('add-modal').style.display='flex'" class="w-12 h-12 glass-card flex items-center justify-center text-blue-400 hover:scale-110 transition-all">
-                    <i class="fas fa-plus"></i>
-                </button>
+            <div class="flex gap-3">
+                <button id="admin-only-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass flex items-center justify-center text-yellow-500"><i class="fas fa-users-cog"></i></button>
+                <button onclick="location.reload()" class="w-12 h-12 glass flex items-center justify-center text-red-500"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </header>
 
-        <div id="vm-list" class="space-y-6"></div>
+        <div id="create-box" class="hidden glass p-6 mb-10 border-l-4 border-blue-500">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="password" id="gh-token" placeholder="GitHub Token" class="flex-1 bg-black/40 border border-white/10 p-4 rounded-2xl outline-none">
+                <button onclick="deploy()" class="bg-blue-600 px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-blue-500 transition">Create Windows VM</button>
+            </div>
+        </div>
+
+        <div id="vm-list" class="grid gap-6"></div>
     </div>
 
-    <div id="add-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-6">
-        <div class="glass-card w-full max-w-sm p-8">
-            <h2 class="text-xl font-bold mb-6 italic text-white text-center">DEPLOY NEW VM</h2>
-            <div class="space-y-4 text-sm">
-                <input type="password" id="gh-token" placeholder="GitHub Token" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-white">
-                <input type="text" id="owner-name" placeholder="Tên người tạo" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 text-white">
-                <select id="os-choice" class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 outline-none text-white">
-                    <option value="Windows">Windows Server</option>
-                    <option value="Ubuntu">Ubuntu Linux</option>
-                </select>
-                <button id="btn-deploy" onclick="deployVM()" class="w-full bg-blue-600 py-4 rounded-xl font-black text-xs uppercase tracking-widest mt-4">KHỞI CHẠY</button>
-                <button onclick="document.getElementById('add-modal').style.display='none'" class="w-full text-[10px] font-bold opacity-30 uppercase tracking-[0.2em]">HỦY BỎ</button>
+    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-50 hidden p-6 overflow-y-auto">
+        <div class="max-w-2xl mx-auto">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black italic">USER MANAGEMENT</h2>
+                <button onclick="closeAdmin()" class="w-12 h-12 glass text-red-500 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
+            <div id="user-table" class="space-y-4"></div>
         </div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const REPO = "vpsf0605-dev/zunrdp-Cloud";
+        let session = null;
 
-        function getUptime(start) {
-            if (!start) return "00h 00m 00s";
-            let diff = Math.floor((Date.now() - start) / 1000);
-            if (diff < 0) diff = 0;
-            let h = Math.floor(diff / 3600).toString().padStart(2, '0');
-            let m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
-            let s = (diff % 60).toString().padStart(2, '0');
-            return `${h}h ${m}m ${s}s`;
+        // Xử lý Đăng nhập
+        async function handleLogin() {
+            const u = document.getElementById('user-in').value;
+            const p = document.getElementById('pass-in').value;
+
+            if(u === "ZunRdp" && p === "26082007ngoc") {
+                session = { id: u, role: 'admin', canCreate: true };
+            } else {
+                const res = await fetch(`${API}/users/${u}.json`);
+                const data = await res.json();
+                if(data && data.password === p && !data.isBanned) {
+                    session = { id: u, role: 'user', ...data };
+                } else { return alert("Sai tài khoản hoặc bị BAN!"); }
+            }
+            showDashboard();
         }
 
-        async function deployVM() {
-            const token = document.getElementById('gh-token').value;
-            const owner = document.getElementById('owner-name').value;
-            const os = document.getElementById('os-choice').value;
-            const btn = document.getElementById('btn-deploy');
-            if(!token || !owner) return alert("Vui lòng điền đủ!");
+        function showDashboard() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('hello-user').innerText = `HELLO, ${session.id}`;
+            if(session.role === 'admin') {
+                document.getElementById('admin-only-btn').classList.remove('hidden');
+                document.getElementById('role-tag').innerText = "Supreme Admin";
+            }
+            if(session.canCreate) document.getElementById('create-box').classList.remove('hidden');
             
-            btn.disabled = true; btn.innerText = "SENDING...";
-            try {
-                const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
-                    method: 'POST', headers: { 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ ref: 'main', inputs: { machine_name: os, owner_name: owner } })
-                });
-                if(res.ok) { alert("🚀 Đã gửi lệnh khởi tạo!"); document.getElementById('add-modal').style.display='none'; }
-                else alert("❌ Token hoặc Repo sai!");
-            } catch(e) { alert("Lỗi!"); } finally { btn.disabled = false; btn.innerText = "KHỞI CHẠY"; }
+            setInterval(fetchVMs, 2000);
+        }
+
+        async function fetchVMs() {
+            const res = await fetch(`${API}/vms.json`);
+            const vms = await res.json() || {};
+            let html = '';
+            for(let id in vms) {
+                const vm = vms[id];
+                if(session.role !== 'admin' && vm.owner !== session.id) continue;
+                if(Date.now() - vm.lastSeen > 60000) continue;
+
+                html += `
+                <div class="glass p-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="text-xl font-black text-white">${vm.id}</h3>
+                            <p class="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">Owner: ${vm.owner}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[8px] opacity-40 uppercase font-bold block">Uptime</span>
+                            <span class="text-xs font-mono font-bold text-blue-300">${Math.floor((Date.now()-vm.startTime)/60000)}m</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div class="flex justify-between text-[9px] font-bold opacity-40 mb-2 uppercase"><span>CPU</span><span>${vm.cpu}%</span></div>
+                            <div class="h-1 bg-white/10 rounded-full"><div class="bg-blue-500 h-1 rounded-full transition-all" style="width:${vm.cpu}%"></div></div>
+                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                            <div class="flex justify-between text-[9px] font-bold opacity-40 mb-2 uppercase"><span>RAM</span><span>${vm.ram}%</span></div>
+                            <div class="h-1 bg-white/10 rounded-full"><div class="bg-green-500 h-1 rounded-full transition-all" style="width:${vm.ram}%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/40 p-4 rounded-2xl text-[11px] font-bold space-y-2 mb-6">
+                        <div class="flex justify-between"><span class="opacity-30">IP:</span><span class="text-blue-400">${vm.ip}</span></div>
+                        <div class="flex justify-between"><span class="opacity-30">PASS:</span><span>ZunRDP@123456</span></div>
+                    </div>
+
+                    <button onclick="killVM('${id}')" class="w-full bg-red-500/10 text-red-500 border border-red-500/20 py-3 rounded-xl text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition">Terminate Machine</button>
+                </div>`;
+            }
+            document.getElementById('vm-list').innerHTML = html || '<p class="text-center py-20 opacity-20 italic">No machines active.</p>';
+        }
+
+        // --- ADMIN FUNCTIONS ---
+        async function openAdmin() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            const res = await fetch(`${API}/users.json`);
+            const users = await res.json() || {};
+            let html = '';
+            for(let name in users) {
+                html += `
+                <div class="glass p-5 flex justify-between items-center border-l-4 ${users[name].isBanned ? 'border-red-500' : 'border-green-500'}">
+                    <div>
+                        <p class="font-bold text-white">${name}</p>
+                        <p class="text-[10px] opacity-40 uppercase">Create Permission: ${users[name].canCreate ? 'YES' : 'NO'}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateUser('${name}', {canCreate: true})" class="w-10 h-10 glass text-green-500"><i class="fas fa-check"></i></button>
+                        <button onclick="updateUser('${name}', {isBanned: true})" class="w-10 h-10 glass text-red-500"><i class="fas fa-ban"></i></button>
+                    </div>
+                </div>`;
+            }
+            document.getElementById('user-table').innerHTML = html;
+        }
+
+        async function updateUser(name, data) {
+            await fetch(`${API}/users/${name}.json`, { method: 'PATCH', body: JSON.stringify(data) });
+            if(data.isBanned) { /* Tắt máy user nếu bị ban */ }
+            openAdmin();
         }
 
         async function killVM(id) {
-            if(confirm(`Xác nhận TẮT NGAY máy: ${id}?`)) {
-                await fetch(`${API}/vms/${id}.json`, { 
-                    method: 'PATCH', 
-                    body: JSON.stringify({ command: 'kill' }) 
-                });
-                alert("Lệnh tử hình đã gửi!");
+            if(confirm("Dừng máy này ngay lập tức?")) {
+                await fetch(`${API}/vms/${id}.json`, { method: 'PATCH', body: JSON.stringify({ command: 'kill' }) });
             }
         }
 
-        async function refresh() {
-            try {
-                const res = await fetch(`${API}/vms.json`);
-                const data = await res.json() || {};
-                let html = '', count = 0;
-                for (let id in data) {
-                    const vm = data[id];
-                    if (Date.now() - vm.lastSeen > 60000) continue;
-                    count++;
-                    html += `
-                    <div class="glass-card p-6 border-l-4 border-l-blue-500">
-                        <div class="flex justify-between items-start mb-5">
-                            <div class="flex items-center gap-4">
-                                <div class="status-pulse"></div>
-                                <div>
-                                    <h3 class="text-lg font-black text-white tracking-tight">${vm.id}</h3>
-                                    <span class="text-[10px] font-bold text-blue-400 uppercase">By: ${vm.owner}</span>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[8px] font-bold opacity-30 uppercase block mb-1">Thời gian chạy</span>
-                                <span class="text-white font-mono font-bold text-xs bg-white/5 px-2 py-1 rounded-lg">${getUptime(vm.startTime)}</span>
-                            </div>
-                        </div>
-                        <div class="bg-black/30 rounded-2xl p-4 mb-5 border border-white/5 flex flex-col gap-2">
-                            <div class="flex justify-between text-[11px]"><span class="opacity-40">IP ADDRESS:</span> <span class="text-blue-400 font-bold">${vm.ip}</span></div>
-                            <div class="flex justify-between text-[11px] border-t border-white/5 pt-2"><span class="opacity-40">USER/PASS:</span> <span class="text-white">ADMINZUN / ZunRDP@123456</span></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="navigator.clipboard.writeText('${vm.ip}'); alert('Copied IP!')" class="flex-1 h-12 glass-card hover:bg-white/5 text-[10px] font-bold uppercase tracking-widest">Copy IP</button>
-                            <button onclick="killVM('${id}')" class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"><i class="fas fa-power-off"></i></button>
-                        </div>
-                    </div>`;
-                }
-                document.getElementById('vm-list').innerHTML = html || '<p class="text-center py-20 opacity-20 italic">No VM Online</p>';
-                document.getElementById('total-vms').innerText = count;
-            } catch (e) {}
-        }
-        setInterval(refresh, 1000); refresh();
+        function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
     </script>
 </body>
 </html>
