@@ -17,10 +17,10 @@
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
         .btn-action { height: 52px; border-radius: 18px; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; width: 100%; }
         .btn-kill { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-        .uptime-badge { background: rgba(59, 130, 246, 0.1); color: #60a5fa; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 800; border: 1px solid rgba(59, 130, 246, 0.1); }
+        /* Badge đếm ngược */
+        .countdown-badge { background: rgba(250, 204, 21, 0.1); color: #facc15; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 800; border: 1px solid rgba(250, 204, 21, 0.2); animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.7; } }
         .kill-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; width: 60px; text-align: center; color: white; font-size: 11px; font-weight: 800; padding: 5px 0; outline: none; }
-        .countdown-text { color: #facc15; font-size: 10px; font-weight: 800; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
         .copy-link { color: #3b82f6; font-weight: 800; text-transform: uppercase; font-size: 9px; cursor: pointer; padding: 2px 6px; }
     </style>
@@ -35,7 +35,9 @@
                 <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[2px] mt-1">Hệ Thống Cloud Việt Nam</p>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="document.getElementById('create-modal').style.display='flex'" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-blue-400 shadow-xl"><i class="fas fa-plus text-lg"></i></button>
+                <button onclick="document.getElementById('create-modal').style.display='flex'" class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-blue-400 active:scale-90 transition-all">
+                    <i class="fas fa-plus text-lg"></i>
+                </button>
                 <div class="glass px-5 py-2.5 rounded-2xl border border-blue-500/20 text-center">
                     <span id="node-count" class="text-xl font-black text-blue-500">0</span>
                     <span class="text-[8px] block text-blue-500/50 font-black uppercase">Online</span>
@@ -73,7 +75,7 @@
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
         const REPO = "vpsf0605-dev/zunrdp-Cloud";
-        let countdowns = {}; // Lưu trữ bộ đếm cho từng máy
+        let countdowns = {}; 
 
         if(localStorage.getItem('gh_token')) document.getElementById('gh-token').value = localStorage.getItem('gh_token');
         if(localStorage.getItem('zun_owner')) document.getElementById('owner-name').value = localStorage.getItem('zun_owner');
@@ -103,14 +105,6 @@
             } catch (e) { alert("Lỗi kết nối!"); }
         }
 
-        function formatUptime(startTime) {
-            const diff = Math.floor((Date.now() - (startTime || (Date.now() - 600000))) / 1000);
-            const h = Math.floor(diff / 3600);
-            const m = Math.floor((diff % 3600) / 60);
-            const s = diff % 60;
-            return `${h > 0 ? h + 'h ' : ''}${m}p ${s}s`;
-        }
-
         async function refresh() {
             try {
                 const res = await fetch(`${API}/vms.json`);
@@ -122,8 +116,8 @@
                     if (Math.floor((Date.now() - vm.lastSeen) / 1000) > 60) continue;
                     count++;
                     
-                    const uptime = formatUptime(vm.startTime);
-                    const cd = countdowns[id] ? `<span class="countdown-text ml-2">⌛ ${countdowns[id].label}</span>` : '';
+                    // Nếu có đếm ngược mới hiện Badge
+                    const cdBadge = countdowns[id] ? `<div class="countdown-badge mt-1"><i class="fas fa-hourglass-half mr-1"></i> Tự ngắt: ${countdowns[id].label}</div>` : '';
 
                     html += `
                     <div class="rdp-card glass">
@@ -132,7 +126,7 @@
                                 <div class="status-pulse"></div>
                                 <div>
                                     <h3 class="font-extrabold text-xl tracking-tighter">${vm.id}</h3>
-                                    <div class="uptime-badge mt-1"><i class="far fa-clock mr-1"></i> Running: ${uptime} ${cd}</div>
+                                    ${cdBadge}
                                 </div>
                             </div>
                             <span class="bg-blue-500/10 text-blue-400 text-[9px] font-black px-3 py-1.5 rounded-xl border border-blue-500/10 uppercase">${vm.os}</span>
@@ -151,19 +145,18 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <input type="number" id="time-${id}" placeholder="Phút" class="kill-input">
-                                    <button onclick="startCountdown('${id}')" class="text-blue-500 active:scale-75"><i class="fas fa-stopwatch text-lg"></i></button>
+                                    <button onclick="startCountdown('${id}')" class="text-blue-500 active:scale-75 transition-all"><i class="fas fa-stopwatch text-lg"></i></button>
                                 </div>
                             </div>
                             <button onclick="sendKill('${id}')" class="w-20 btn-action btn-kill"><i class="fas fa-power-off"></i></button>
                         </div>
                     </div>`;
                 }
-                container.innerHTML = html || '<p class="text-center opacity-20 py-20 font-bold">KHÔNG CÓ MÁY</p>';
+                container.innerHTML = html || '<p class="text-center opacity-20 py-20 font-bold uppercase tracking-widest text-xs">Không có máy online</p>';
                 document.getElementById('node-count').innerText = count;
             } catch (e) {}
         }
 
-        // Hàm xử lý đếm ngược ngay trên trình duyệt
         function startCountdown(id) {
             const mins = document.getElementById(`time-${id}`).value;
             if(!mins || mins < 1) return alert("Nhập số phút!");
@@ -171,7 +164,7 @@
             if(countdowns[id]) clearInterval(countdowns[id].timer);
             
             let totalSeconds = mins * 60;
-            showToast(`⏰ Đã đặt lịch tắt ${id} sau ${mins} phút`);
+            showToast(`⏰ Đã đặt lịch: Tắt máy sau ${mins} phút`);
 
             countdowns[id] = {
                 label: `${mins}:00`,
@@ -185,19 +178,21 @@
                     if (totalSeconds <= 0) {
                         clearInterval(countdowns[id].timer);
                         delete countdowns[id];
-                        // Khi hết giờ, tự động gửi lệnh kill lên Firebase
                         await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
-                        showToast(`🔥 Hết giờ! Đã tắt máy ${id}`);
+                        showToast(`🔥 Đã thực hiện lệnh tắt máy ${id}`);
                     }
                 }, 1000)
             };
+            // Cập nhật giao diện ngay lập tức thay vì đợi 5s refresh
+            refresh();
         }
 
         async function sendKill(id) {
-            if(!confirm(`⚠️ Tắt ngay máy ${id}?`)) return;
+            if(!confirm(`⚠️ Tắt máy ${id} ngay lập tức?`)) return;
             if(countdowns[id]) { clearInterval(countdowns[id].timer); delete countdowns[id]; }
             await fetch(`${API}/commands/${id}.json`, { method: 'PUT', body: JSON.stringify('kill') });
-            showToast("🚀 Đã tắt máy!");
+            showToast("🚀 Đã gửi lệnh tắt!");
+            refresh();
         }
 
         setInterval(refresh, 5000); refresh();
