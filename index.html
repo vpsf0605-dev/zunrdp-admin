@@ -2,15 +2,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP | ULTIMATE CLOUD CONTROL</title>
+    <title>ZUNRDP </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .btn-main { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: 0.3s; color: white; border: none; }
-        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .btn-main { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: 0.3s; color: white; border: none; font-weight: 800; }
         .input-style { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; }
         .progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
         .progress-fill { height: 100%; transition: width 0.8s ease; }
@@ -20,16 +19,16 @@
 
     <div id="auth-gate" class="min-h-[90vh] flex items-center justify-center">
         <div class="glass p-8 w-full max-w-sm text-center border-t-4 border-blue-500 shadow-2xl">
-            <h1 class="text-4xl font-black italic mb-6 tracking-tighter">ZUNRDP</h1>
+            <h1 class="text-4xl font-black italic mb-6">ZUNRDP</h1>
             <div class="space-y-4">
                 <input type="text" id="u-in" placeholder="Username" class="input-style w-full p-4 rounded-2xl text-center">
                 <input type="password" id="p-in" placeholder="Password" class="input-style w-full p-4 rounded-2xl text-center">
                 <div class="grid grid-cols-2 gap-3" id="login-btns">
-                    <button onclick="auth('login')" class="btn-main py-4 rounded-2xl font-black text-xs uppercase">Login</button>
-                    <button onclick="toggleAuth(true)" class="bg-white/5 py-4 rounded-2xl font-black text-xs uppercase border border-white/10">Reg</button>
+                    <button onclick="auth('login')" class="btn-main py-4 rounded-2xl text-xs uppercase">Login</button>
+                    <button onclick="toggleAuth(true)" class="bg-white/5 py-4 rounded-2xl text-xs uppercase border border-white/10">Reg</button>
                 </div>
                 <div id="reg-btns" class="hidden">
-                    <button onclick="auth('register')" class="btn-main w-full py-4 rounded-2xl font-black text-xs uppercase mb-3">Tạo Tài Khoản</button>
+                    <button onclick="auth('register')" class="btn-main w-full py-4 rounded-2xl text-xs uppercase mb-3">Tạo Tài Khoản</button>
                     <button onclick="toggleAuth(false)" class="text-[10px] uppercase font-bold opacity-40 cursor-pointer block">Quay lại</button>
                 </div>
             </div>
@@ -40,10 +39,7 @@
         <header class="flex justify-between items-center mb-6">
             <div>
                 <h2 id="hello" class="text-2xl font-black italic text-blue-400"></h2>
-                <div class="flex items-center gap-2 mt-1">
-                    <p id="vm-count" class="text-[9px] font-bold text-gray-500 uppercase">0 MÁY ONLINE</p>
-                    <span id="limit-info" class="text-[9px] font-bold text-purple-500 border border-purple-500/30 px-2 py-0.5 rounded-full uppercase">LIMIT: 0</span>
-                </div>
+                <p id="vm-count" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">0 MÁY ONLINE</p>
             </div>
             <div class="flex gap-2">
                 <button id="admin-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass text-yellow-500 flex items-center justify-center"><i class="fas fa-crown"></i></button>
@@ -51,13 +47,13 @@
             </div>
         </header>
 
-        <div class="glass p-6 mb-8 border-t-4 border-blue-600 shadow-xl">
-            <p class="text-[10px] text-blue-400 font-bold mb-2 uppercase text-center">Mã Key của bạn:</p>
+        <div class="glass p-6 mb-8 border-t-4 border-blue-600">
             <div class="bg-black/40 p-4 rounded-xl mb-4 text-center border border-white/5">
+                <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã Key Truy Cập</p>
                 <p id="my-key" class="text-xl font-black tracking-widest font-mono text-purple-400">CHỜ CẤP</p>
             </div>
-            <input type="text" id="key-input" placeholder="Dán mã ZUN-XXXX..." class="input-style w-full p-4 rounded-2xl outline-none mb-4 text-center font-bold text-blue-400 border border-blue-500/20">
-            <button onclick="createVM()" id="run-btn" class="w-full btn-main py-5 rounded-2xl font-black text-xs uppercase tracking-widest">
+            <input type="text" id="key-input" placeholder="Dán mã ZUN-XXXX..." class="input-style w-full p-4 rounded-2xl mb-4 text-center font-bold text-blue-400 border border-blue-500/20">
+            <button onclick="createVM()" id="run-btn" class="w-full btn-main py-5 rounded-2xl text-xs uppercase tracking-widest shadow-lg">
                 <i class="fas fa-play mr-2"></i> KHỞI TẠO WINDOWS VM
             </button>
         </div>
@@ -78,7 +74,6 @@
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
         let me = null;
-        let currentVMCount = 0;
 
         function toggleAuth(reg) {
             document.getElementById('login-btns').style.display = reg ? 'none' : 'grid';
@@ -86,39 +81,37 @@
         }
 
         async function auth(type) {
-            const u = document.getElementById('u-in').value.trim();
+            const u = document.getElementById('u-in').value.trim().toLowerCase(); // Luôn lưu chữ thường
             const p = document.getElementById('p-in').value.trim();
-            if(!u || !p) return alert("Vui lòng điền đủ!");
+            if(!u || !p) return alert("Thiếu thông tin!");
 
             try {
                 if(type === 'register') {
                     await fetch(`${API}/users/${u}.json`, { method:'PUT', body: JSON.stringify({password:p, key:'', githubToken:'', customRepo:'', maxVM:1}) });
                     alert("Đăng ký thành công!"); toggleAuth(false);
                 } else {
-                    if(u === "ZunRdp" && p === "26082007ngoc") me = { id:u, role:'admin', key:'ADMIN-MASTER', maxVM:999 };
+                    if(u === "zunrdp" && p === "26082007ngoc") me = { id:u, role:'admin', key:'ADMIN-MASTER', maxVM:999 };
                     else {
                         const data = await fetch(`${API}/users/${u}.json`).then(r => r.json());
                         if(data && data.password === p) me = { id:u, role:'user', ...data };
-                        else return alert("Sai tài khoản hoặc mật khẩu!");
+                        else return alert("Sai tài khoản!");
                     }
                     start();
                 }
-            } catch(e) { alert("Lỗi Firebase!"); }
+            } catch(e) { alert("Lỗi kết nối!"); }
         }
 
         function start() {
             document.getElementById('auth-gate').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('hello').innerText = `HI, ${me.id}`;
+            document.getElementById('hello').innerText = `HI, ${me.id.toUpperCase()}`;
             document.getElementById('my-key').innerText = me.key || "CHỜ CẤP";
-            document.getElementById('limit-info').innerText = `LIMIT: ${me.maxVM || 0}`;
             if(me.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
             setInterval(fetchVM, 5000); fetchVM();
         }
 
         async function createVM() {
             const inputKey = document.getElementById('key-input').value.trim();
-            if(!inputKey) return alert("Hãy nhập mã Key!");
             const btn = document.getElementById('run-btn');
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> ĐANG GỬI LỆNH...';
 
@@ -128,8 +121,7 @@
                 for(let u in users) { if(users[u].key === inputKey) { target = users[u]; break; } }
                 if(inputKey === "ADMIN-MASTER") target = { githubToken: "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", customRepo: "vpsf0605-dev/zunrdp-Cloud", maxVM: 999 };
 
-                if(!target || !target.githubToken || !target.customRepo) throw new Error("Key sai hoặc chưa cấu hình Token/Repo!");
-                if(currentVMCount >= target.maxVM) throw new Error("Đã đạt giới hạn máy!");
+                if(!target) throw new Error("Key không tồn tại!");
 
                 const res = await fetch(`https://api.github.com/repos/${target.customRepo}/actions/workflows/vm.yml/dispatches`, {
                     method:'POST',
@@ -137,8 +129,8 @@
                     body: JSON.stringify({ref:'main', inputs:{access_key: "ADMIN-MASTER"}})
                 });
 
-                if(res.ok || res.status === 204) alert("🚀 Gửi lệnh khởi tạo thành công!");
-                else alert("❌ Lỗi GitHub: Kiểm tra Token!");
+                if(res.ok || res.status === 204) alert("🚀 Đã gửi lệnh tạo máy!");
+                else alert("❌ Lỗi GitHub: Check lại Token/Repo!");
             } catch(e) { alert("❌ " + e.message); }
             btn.disabled = false; btn.innerText = "KHỞI TẠO WINDOWS VM";
         }
@@ -148,47 +140,56 @@
                 const res = await fetch(`${API}/vms.json`);
                 const vms = await res.json() || {};
                 let h = ''; let count = 0;
+                
                 for(let id in vms) {
                     const v = vms[id];
-                    // FIX: Admin thấy tất cả, Member thấy máy có owner = username
-                    if(me.role !== 'admin' && v.owner !== me.id) continue;
-                    if(Date.now() - v.lastSeen > 120000) continue;
-                    count++;
-                    const cC = v.cpu > 80 ? 'bg-red-500' : (v.cpu > 50 ? 'bg-yellow-500' : 'bg-green-500');
-                    const rC = v.ram > 80 ? 'bg-red-500' : (v.ram > 50 ? 'bg-yellow-500' : 'bg-green-500');
+                    // CHUẨN HÓA ĐỂ SO SÁNH (Tránh lỗi chữ hoa chữ thường)
+                    const ownerName = (v.owner || "").toLowerCase().trim();
+                    const myName = me.id.toLowerCase().trim();
 
-                    h += `<div class="glass p-6 mb-4 border-l-4 border-blue-500">
-                        <div class="flex justify-between items-center mb-4"><span class="font-black text-blue-400 italic">${v.id}</span><span class="text-[8px] opacity-40 uppercase font-bold">${v.owner}</span></div>
+                    // Admin thấy hết, Member chỉ thấy máy mình
+                    if(me.role !== 'admin' && ownerName !== myName) continue;
+                    if(Date.now() - v.lastSeen > 120000) continue;
+                    
+                    count++;
+                    const cC = v.cpu > 80 ? 'bg-red-500' : 'bg-green-500';
+                    const rC = v.ram > 80 ? 'bg-red-500' : 'bg-green-500';
+
+                    h += `<div class="glass p-6 mb-4 border-l-4 border-blue-500 shadow-xl">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-[10px] text-gray-500 font-bold uppercase">Machine ID</p>
+                                <h3 class="font-black text-blue-400 italic text-lg">${v.id}</h3>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-gray-500 font-bold uppercase">Người tạo</p>
+                                <p class="text-[10px] text-purple-400 font-black uppercase">${v.owner || 'N/A'}</p>
+                            </div>
+                        </div>
                         <div class="space-y-3 mb-4 text-[9px] font-bold uppercase">
-                            <div><div class="flex justify-between mb-1"><span>CPU Usage</span><span>${v.cpu}%</span></div><div class="progress-bar"><div class="progress-fill ${cC}" style="width:${v.cpu}%"></div></div></div>
-                            <div><div class="flex justify-between mb-1"><span>RAM Usage</span><span>${v.ram}%</span></div><div class="progress-bar"><div class="progress-fill ${rC}" style="width:${v.ram}%"></div></div></div>
+                            <div><div class="flex justify-between mb-1"><span>CPU</span><span>${v.cpu}%</span></div><div class="progress-bar"><div class="progress-fill ${cC}" style="width:${v.cpu}%"></div></div></div>
+                            <div><div class="flex justify-between mb-1"><span>RAM</span><span>${v.ram}%</span></div><div class="progress-bar"><div class="progress-fill ${rC}" style="width:${v.ram}%"></div></div></div>
                         </div>
                         <div class="bg-black/60 p-4 rounded-2xl text-[10px] font-mono border border-white/5 space-y-2 mb-4">
                             <p class="flex justify-between"><span>IP:</span> <span class="text-blue-400 font-bold">${v.ip}</span></p>
-                            <p class="flex justify-between uppercase"><span>Password:</span> <span class="text-yellow-400 font-bold">ZunRDP@123456</span></p>
+                            <p class="flex justify-between"><span>PASS:</span> <span class="text-yellow-400 font-bold">ZunRDP@123456</span></p>
                         </div>
-                        <button onclick="killVM('${id}')" id="btn-stop-${id}" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition border border-red-500/30">DỪNG MÁY</button>
+                        <button onclick="killVM('${id}')" id="btn-stop-${id}" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition border border-red-500/30">DỪNG MÁY NGAY</button>
                     </div>`;
                 }
-                currentVMCount = count;
                 document.getElementById('vm-list').innerHTML = h || '<p class="text-center opacity-20 py-10 italic">KHÔNG CÓ MÁY ONLINE</p>';
                 document.getElementById('vm-count').innerText = `${count} MÁY ONLINE`;
             } catch(e) {}
         }
 
         async function killVM(vmId) {
-            if(!confirm("Xác nhận tắt máy ảo ngay lập tức?")) return;
+            if(!confirm("Xác nhận tắt máy ảo?")) return;
             const btn = document.getElementById(`btn-stop-${vmId}`);
-            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> ĐANG DỪNG...';
-            
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> DỪNG...';
             try {
-                // Gửi lệnh stop vào mục commands (Riêng biệt để không bị máy ảo ghi đè)
-                await fetch(`${API}/commands/${vmId}.json`, { 
-                    method: 'PUT', 
-                    body: JSON.stringify({ action: 'stop', time: Date.now() }) 
-                });
-                alert("✅ Đã gửi lệnh tắt! Máy sẽ dừng sau 5-10 giây.");
-            } catch(e) { alert("Lỗi khi dừng máy!"); }
+                await fetch(`${API}/commands/${vmId}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+                alert("✅ Lệnh tắt đã gửi!");
+            } catch(e) { alert("Lỗi kết nối!"); }
         }
 
         async function openAdmin() {
@@ -199,8 +200,7 @@
             for(let n in users) {
                 h += `<div class="glass p-4 flex justify-between items-center mb-3">
                     <div class="max-w-[180px]">
-                        <p class="font-black uppercase text-sm truncate text-blue-400">${n}</p>
-                        <p class="text-[8px] opacity-50 truncate uppercase">Repo: ${users[n].customRepo || 'N/A'}</p>
+                        <p class="font-black uppercase text-sm text-blue-400">${n}</p>
                         <p class="text-[9px] text-purple-400 font-bold">Limit: ${users[n].maxVM || 1} VM</p>
                     </div>
                     <button onclick="grant('${n}')" class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
@@ -210,16 +210,15 @@
         }
 
         async function grant(username) {
-            const token = prompt(`1. Nhập GITHUB TOKEN cho [${username}]:`); if(!token) return;
-            const repo = prompt(`2. Nhập REPO (Ví dụ: user/repo):`); if(!repo) return;
-            const limit = prompt(`3. Nhập GIỚI HẠN máy:`, "1"); if(limit === null) return;
+            const token = prompt("GitHub Token:"); if(!token) return;
+            const repo = prompt("Repo (user/repo):"); if(!repo) return;
+            const limit = prompt("Số lượng máy:", "1");
             const randomKey = "ZUN-" + Math.floor(Math.random() * 9000 + 1000);
             await fetch(`${API}/users/${username}.json`, { 
                 method:'PATCH', 
                 body: JSON.stringify({ key: randomKey, githubToken: token.trim(), customRepo: repo.trim(), maxVM: parseInt(limit) || 1 }) 
             });
-            alert(`✅ Cập nhật xong cho: ${username}`);
-            openAdmin();
+            alert("Đã xong!"); openAdmin();
         }
     </script>
 </body>
