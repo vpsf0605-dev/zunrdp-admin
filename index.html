@@ -2,189 +2,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP | CLOUD PANEL</title>
+    <title>ZUNRDP PANEL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .btn-blue { background: linear-gradient(to right, #2563eb, #3b82f6); box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.5); }
+        body { background: #020617; color: white; font-family: sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+        .btn-blue { background: linear-gradient(to right, #2563eb, #7c3aed); }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10">
 
-    <div id="auth-gate" class="min-h-[80vh] flex items-center justify-center">
-        <div class="glass p-8 w-full max-w-sm text-center">
-            <h1 class="text-3xl font-extrabold italic mb-8">ZUNRDP <span class="text-blue-500 text-sm tracking-widest block not-italic">MANAGEMENT</span></h1>
-            <div class="space-y-4">
-                <input type="text" id="u-in" placeholder="Tên tài khoản" class="w-full p-4 bg-black/40 border border-white/10 rounded-2xl outline-none focus:border-blue-500 transition">
-                <input type="password" id="p-in" placeholder="Mật khẩu" class="w-full p-4 bg-black/40 border border-white/10 rounded-2xl outline-none focus:border-blue-500 transition">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="login()" class="btn-blue py-4 rounded-2xl font-black uppercase text-xs">Login</button>
-                    <button onclick="register()" class="bg-white/5 py-4 rounded-2xl font-black uppercase text-xs border border-white/10">Sign Up</button>
-                </div>
-            </div>
+    <div id="main" class="max-w-md mx-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h1 id="user-tag" class="text-2xl font-bold italic uppercase">ZUNRDP</h1>
+            <button onclick="openAdmin()" id="adm-btn" class="hidden text-yellow-500 text-xl"><i class="fas fa-crown"></i></button>
         </div>
+
+        <div id="vm-count" class="text-blue-400 text-[10px] font-bold tracking-widest mb-6">0 MÁY ĐANG CHẠY</div>
+
+        <div class="glass p-6 mb-8 border-l-4 border-blue-500">
+            <p class="text-[10px] opacity-50 mb-2">NHẬP KEY ĐỂ TẠO MÁY</p>
+            <input type="text" id="key-in" placeholder="Dán mã Key tại đây..." class="w-full p-4 bg-black/40 rounded-xl outline-none border border-white/5 mb-4 text-center font-bold">
+            <button onclick="create()" id="btn-run" class="w-full btn-blue py-4 rounded-xl font-bold text-xs">KHỞI TẠO WINDOWS VM</button>
+        </div>
+
+        <div id="list" class="space-y-4"></div>
     </div>
 
-    <div id="dashboard" class="hidden max-w-md mx-auto">
-        <header class="flex justify-between items-center mb-6">
-            <div>
-                <h2 id="hello" class="text-2xl font-black italic uppercase"></h2>
-                <p id="vm-count" class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1">0 MÁY ẢO ĐANG CHẠY</p>
-            </div>
-            <div class="flex gap-2">
-                <button id="admin-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass text-yellow-500 flex items-center justify-center shadow-lg"><i class="fas fa-crown"></i></button>
-                <button onclick="location.reload()" class="w-12 h-12 glass text-red-500 flex items-center justify-center shadow-lg"><i class="fas fa-power-off"></i></button>
-            </div>
-        </header>
-
-        <div id="create-section" class="hidden glass p-6 mb-8 border-t-4 border-blue-600">
-            <div class="mb-4">
-                <p class="text-[10px] font-bold text-blue-400 mb-1 italic">Key tài khoản của bạn:</p>
-                <p id="my-key" class="text-sm font-black tracking-widest select-all bg-white/5 p-2 rounded-lg border border-white/5 text-center">CHƯA CẤP</p>
-            </div>
-            <input type="text" id="key-input" placeholder="Nhập Key để xác thực" class="w-full p-4 bg-black/40 border border-white/10 rounded-2xl outline-none mb-4 text-center font-bold text-blue-400">
-            <button onclick="createVM()" id="run-btn" class="w-full btn-blue py-5 rounded-2xl font-black text-xs uppercase transition active:scale-95">Tạo Windows VM</button>
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden p-6 z-50 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold">QUẢN TRỊ VIÊN</h2>
+            <button onclick="document.getElementById('modal').style.display='none'"><i class="fas fa-times text-2xl text-red-500"></i></button>
         </div>
-
-        <div id="vm-list" class="space-y-6"></div>
-    </div>
-
-    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-50 hidden p-6 overflow-y-auto">
-        <div class="max-w-md mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-black italic uppercase">Admin Control</h3>
-                <button onclick="closeAdmin()" class="text-red-500 text-2xl"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="user-list" class="space-y-4"></div>
-        </div>
+        <div id="user-list" class="space-y-3"></div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        const GITHUB_TOKEN = "DÁN_TOKEN_GITHUB_CỦA_BẠN_Ở_ĐÂY";
+        const GITHUB = "TOKEN_CUA_BAN";
         const REPO = "vpsf0605-dev/zunrdp-Cloud";
-        let me = null;
+        let me = { id: "Test", role: "admin" }; // Giả lập login, bạn hãy tích hợp code login của bạn vào đây
 
-        async function login() {
-            const u = document.getElementById('u-in').value.trim();
-            const p = document.getElementById('p-in').value.trim();
-            if(u === "ZunRdp" && p === "26082007ngoc") {
-                me = { id: u, role: 'admin', canCreate: true, key: 'ADMIN-MASTER' };
-            } else {
-                const data = await fetch(`${API}/users/${u}.json`).then(r => r.json());
-                if(data && data.password === p) {
-                    if(data.isBanned) return alert("Bạn bị BAN!");
-                    me = { id: u, role: 'user', ...data };
-                } else return alert("Sai thông tin!");
-            }
-            start();
-        }
-
-        async function register() {
-            const u = document.getElementById('u-in').value.trim();
-            const p = document.getElementById('p-in').value.trim();
-            if(!u || !p) return alert("Điền đủ info!");
-            await fetch(`${API}/users/${u}.json`, { method: 'PUT', body: JSON.stringify({password:p, canCreate:false, isBanned:false, key:''}) });
-            alert("Đăng ký thành công!");
-        }
-
-        function start() {
-            document.getElementById('auth-gate').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('hello').innerText = `XIN CHÀO, ${me.id}`;
-            document.getElementById('my-key').innerText = me.key || "CHỜ CẤP KEY";
-            if(me.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
-            if(me.canCreate) document.getElementById('create-section').classList.remove('hidden');
-            setInterval(fetchData, 3000);
-        }
-
-        async function createVM() {
-            const k = document.getElementById('key-input').value.trim();
-            if(k !== me.key) return alert("Sai Key tài khoản!");
-            const btn = document.getElementById('run-btn');
-            btn.disabled = true; btn.innerText = "ĐANG XỬ LÝ...";
+        async function create() {
+            const k = document.getElementById('key-in').value;
+            const btn = document.getElementById('btn-run');
+            btn.innerText = "ĐANG GỬI..."; btn.disabled = true;
+            
             const res = await fetch(`https://api.github.com/repos/${REPO}/actions/workflows/vm.yml/dispatches`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${GITHUB_TOKEN}` },
-                body: JSON.stringify({ ref: 'main', inputs: { machine_name: 'Windows', owner_name: me.id, access_key: k } })
+                headers: { 'Authorization': `Bearer ${GITHUB}` },
+                body: JSON.stringify({ ref: 'main', inputs: { access_key: k } })
             });
-            if(res.ok) alert("Đã gửi yêu cầu tạo VM!");
-            else alert("Lỗi GitHub Actions!");
-            btn.disabled = false; btn.innerText = "TẠO WINDOWS VM";
+            alert(res.ok ? "Đã gửi lệnh!" : "Lỗi gửi lệnh!");
+            btn.innerText = "KHỞI TẠO WINDOWS VM"; btn.disabled = false;
         }
 
-        async function fetchData() {
+        async function load() {
             const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
-            let h = ''; let count = 0;
+            let h = ''; let c = 0;
             for(let id in vms) {
-                const vm = vms[id];
-                if(me.role !== 'admin' && vm.owner !== me.id) continue;
-                if(Date.now() - vm.lastSeen > 60000) continue;
-                count++;
+                const v = vms[id];
+                // Admin thấy hết, User thấy máy của mình
+                if(me.role !== 'admin' && v.owner !== me.id) continue;
+                if(Date.now() - v.lastSeen > 60000) continue;
+                c++;
                 h += `
-                <div class="glass p-6 border-l-4 border-blue-500">
+                <div class="glass p-5">
                     <div class="flex justify-between mb-4">
-                        <p class="font-black italic">${vm.id}</p>
-                        <p class="text-[8px] opacity-50 uppercase">${vm.owner}</p>
+                        <span class="font-bold text-blue-400">${v.id}</span>
+                        <span class="text-[9px] opacity-40 uppercase italic">${v.owner}</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div class="bg-black/40 p-3 rounded-xl">
-                            <p class="text-[8px] opacity-40">CPU</p>
-                            <div class="h-1 bg-white/10 mt-1"><div class="bg-blue-500 h-full" style="width:${vm.cpu}%"></div></div>
-                        </div>
-                        <div class="bg-black/40 p-3 rounded-xl">
-                            <p class="text-[8px] opacity-40">RAM</p>
-                            <div class="h-1 bg-white/10 mt-1"><div class="bg-green-500 h-full" style="width:${vm.ram}%"></div></div>
-                        </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4 text-[10px]">
+                        <div class="bg-black/30 p-2 rounded-lg text-center">CPU: ${v.cpu}%</div>
+                        <div class="bg-black/30 p-2 rounded-lg text-center">RAM: ${v.ram}%</div>
                     </div>
-                    <div class="text-[10px] font-mono bg-black/50 p-3 rounded-xl mb-4">
-                        <p>IP: <span class="text-blue-400">${vm.ip}</span></p>
-                        <p>USER: ADMINZUN / PASS: ZunRDP@123456</p>
+                    <div class="text-[10px] bg-black/60 p-3 rounded-lg mb-4 font-mono">
+                        IP: <span class="text-green-400">${v.ip || 'Connecting...'}</span>
                     </div>
-                    <button onclick="kill('${id}')" class="w-full py-2 bg-red-500/20 text-red-500 text-[10px] font-bold rounded-lg uppercase">Dừng Máy</button>
+                    <button onclick="kill('${id}')" class="w-full py-2 bg-red-500/10 text-red-500 rounded text-[10px] font-bold">HỦY MÁY</button>
                 </div>`;
             }
-            document.getElementById('vm-list').innerHTML = h;
-            document.getElementById('vm-count').innerText = `${count} MÁY ẢO ĐANG CHẠY`;
+            document.getElementById('list').innerHTML = h || '<p class="opacity-20 text-center text-xs py-10">Không có máy nào online</p>';
+            document.getElementById('vm-count').innerText = `${c} MÁY ĐANG HOẠT ĐỘNG`;
         }
 
         async function openAdmin() {
-            document.getElementById('admin-modal').classList.remove('hidden');
+            document.getElementById('modal').style.display = 'block';
             const users = await fetch(`${API}/users.json`).then(r => r.json()) || {};
             let h = '';
             for(let n in users) {
-                h += `
-                <div class="glass p-4 flex justify-between items-center border-l-4 ${users[n].isBanned ? 'border-red-600':'border-green-600'}">
-                    <div>
-                        <p class="font-bold text-sm">${n}</p>
-                        <p class="text-[8px] text-blue-400 font-mono">${users[n].key || 'CHƯA KEY'}</p>
-                    </div>
+                h += `<div class="glass p-4 flex justify-between items-center">
+                    <div><p class="font-bold">${n}</p><p class="text-[9px] text-blue-400">${users[n].key}</p></div>
                     <div class="flex gap-2">
-                        <button onclick="grant('${n}')" class="w-8 h-8 bg-blue-600 rounded-lg text-xs"><i class="fas fa-key"></i></button>
-                        <button onclick="ban('${n}')" class="w-8 h-8 bg-red-600 rounded-lg text-xs"><i class="fas fa-ban"></i></button>
+                        <button onclick="grant('${n}')" class="bg-blue-600 w-8 h-8 rounded"><i class="fas fa-key text-[10px]"></i></button>
+                        <button onclick="ban('${n}')" class="bg-red-600 w-8 h-8 rounded"><i class="fas fa-ban text-[10px]"></i></button>
                     </div>
                 </div>`;
             }
             document.getElementById('user-list').innerHTML = h;
         }
 
-        async function grant(n) {
-            const k = "ZUN-" + Math.floor(Math.random()*9000+1000);
-            await fetch(`${API}/users/${n}.json`, { method: 'PATCH', body: JSON.stringify({canCreate:true, key:k}) });
-            alert("Cấp quyền & Key: " + k); openAdmin();
-        }
-
-        async function ban(n) {
-            const u = await fetch(`${API}/users/${n}.json`).then(r => r.json());
-            await fetch(`${API}/users/${n}.json`, { method: 'PATCH', body: JSON.stringify({isBanned: !u.isBanned}) });
-            alert("Đã cập nhật trạng thái User"); openAdmin();
-        }
-
-        async function kill(id) { await fetch(`${API}/vms/${id}.json`, { method:'PATCH', body:JSON.stringify({command:'kill'}) }); }
-        function closeAdmin() { document.getElementById('admin-modal').classList.add('hidden'); }
+        async function kill(id) { if(confirm("Dừng máy?")) await fetch(`${API}/vms/${id}.json`, { method:'DELETE' }); }
+        
+        setInterval(load, 5000);
+        if(me.role === 'admin') document.getElementById('adm-btn').classList.remove('hidden');
     </script>
 </body>
 </html>
