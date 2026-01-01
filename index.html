@@ -1,226 +1,339 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZUNRDP </title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ZUNRDP CLOUD </title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #f8fafc; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; }
-        .btn-main { background: linear-gradient(135deg, #2563eb, #7c3aed); transition: 0.3s; color: white; border: none; font-weight: 800; }
-        .input-style { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; outline: none; }
-        .progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.8s ease; }
+        :root { 
+            --primary: #00f2ea; --accent: #ff0050; --bg: #050505; 
+            --card: #121212; --text: #fff; --success: #00ff9d; --sub: #888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Layout */
+        .app-header { height: 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: 800; font-size: 24px; letter-spacing: 1px; color: #fff; }
+        .logo span { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .user-pill { background: #1a1a1a; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid #333; }
+        .avatar { width: 28px; height: 28px; background: var(--primary); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+
+        .content { flex: 1; overflow-y: auto; padding: 20px 15px 100px 15px; }
+        .card { background: var(--card); border-radius: 20px; padding: 25px; margin-bottom: 20px; border: 1px solid #222; }
+        
+        /* Stats & Inputs */
+        .stat-container { display: flex; gap: 15px; margin-top: 15px; }
+        .stat-box { flex: 1; background: #000; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #333; }
+        .stat-value { font-size: 20px; font-weight: 800; display: block; }
+
+        .inp-box { background: #000; border: 1px solid #333; border-radius: 12px; padding: 14px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; }
+        .inp-box input, .inp-box select { background: transparent; border: none; color: #fff; width: 100%; font-size: 15px; font-family: inherit; }
+        .inp-box select option { background: #111; color: #fff; }
+
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; text-transform: uppercase; }
+        .btn-primary { background: var(--primary); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid #333; color: var(--sub); }
+        .btn:active { transform: scale(0.96); }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 80px; background: rgba(10,10,10,0.98); border-top: 1px solid #222; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); backdrop-filter: blur(20px); z-index: 100; }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #555; font-weight: 600; text-decoration: none; }
+        .nav-link i { font-size: 26px; margin-bottom: 4px; }
+        .nav-link.active { color: var(--primary); }
+
+        /* Modal Auth */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 200; display: none; align-items: flex-end; }
+        .modal.open { display: flex; }
+        .sheet { background: #111; width: 100%; border-radius: 30px 30px 0 0; padding: 35px 25px; border-top: 1px solid #333; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .auth-tabs { display: flex; background: #000; padding: 5px; border-radius: 12px; margin-bottom: 20px; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 800; color: #555; cursor: pointer; }
+        .tab.active { background: #222; color: #fff; border-radius: 8px; }
+
+        .hidden { display: none !important; }
+        .admin-badge { background: rgba(255,0,80,0.2); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 10px; border: 1px solid var(--accent); margin-left: 5px; font-weight: 800; }
     </style>
 </head>
-<body class="p-4">
+<body>
 
-    <div id="auth-gate" class="min-h-[90vh] flex items-center justify-center">
-        <div class="glass p-8 w-full max-w-sm text-center border-t-4 border-blue-500 shadow-2xl">
-            <h1 class="text-4xl font-black italic mb-6">ZUNRDP</h1>
-            <div class="space-y-4">
-                <input type="text" id="u-in" placeholder="Username" class="input-style w-full p-4 rounded-2xl text-center">
-                <input type="password" id="p-in" placeholder="Password" class="input-style w-full p-4 rounded-2xl text-center">
-                <div class="grid grid-cols-2 gap-3" id="login-btns">
-                    <button onclick="auth('login')" class="btn-main py-4 rounded-2xl text-xs uppercase">Login</button>
-                    <button onclick="toggleAuth(true)" class="bg-white/5 py-4 rounded-2xl text-xs uppercase border border-white/10">Reg</button>
-                </div>
-                <div id="reg-btns" class="hidden">
-                    <button onclick="auth('register')" class="btn-main w-full py-4 rounded-2xl text-xs uppercase mb-3">Tạo Tài Khoản</button>
-                    <button onclick="toggleAuth(false)" class="text-[10px] uppercase font-bold opacity-40 cursor-pointer block">Quay lại</button>
+    <header class="app-header">
+        <div class="logo">ZUNRDP<span>CLOUD</span></div>
+        <div class="user-pill" onclick="handleProfileClick()">
+            <div id="u-avatar" class="avatar">?</div>
+            <div id="u-name" style="margin-left:8px; font-weight:600; font-size:13px;">Đăng nhập</div>
+        </div>
+    </header>
+
+    <div class="content">
+        <div id="view-home" class="page">
+            <div class="card" style="background: linear-gradient(135deg, #001f3f, #000); border: 2px solid var(--primary); text-align:center; padding: 40px 20px;">
+                <h1 style="font-size: 32px; font-weight: 800;">ZUN <span style="color:var(--primary)">CLOUD</span></h1>
+                <p style="color:var(--sub); font-size: 14px; margin-bottom: 25px;">Hệ thống Windows 2025 Automation</p>
+                <button class="btn btn-primary" onclick="switchView('store')">XEM CÁC GÓI THUÊ</button>
+            </div>
+            <div class="card">
+                <h4><i class="fas fa-info-circle text-primary"></i> Giới thiệu</h4>
+                <p style="font-size:13px; color:var(--sub); margin-top:10px; line-height:1.6">Chúng tôi cung cấp giải pháp VPS Windows tự động hoàn toàn qua GitHub Actions, cam kết bảo mật và ổn định 99.9%.</p>
+            </div>
+        </div>
+
+        <div id="view-store" class="page hidden">
+            <h2 style="margin-bottom:20px; font-weight:800;">Chọn Gói VPS</h2>
+            <div id="product-list-render"></div>
+        </div>
+
+        <div id="view-vps" class="page hidden">
+            <h2 style="margin-bottom:20px; font-weight:800;">Máy Chủ Của Tôi</h2>
+            <div id="vps-render"></div>
+        </div>
+
+        <div id="view-wallet" class="page hidden">
+            <div class="card" style="background: linear-gradient(to right, #004d40, #00695c); padding: 30px;">
+                <div style="font-size:12px; opacity:0.8; text-transform: uppercase;">Số dư ví</div>
+                <div id="w-balance" style="font-size: 36px; font-weight: 800; margin: 5px 0;">0 VNĐ</div>
+                <div style="font-size: 13px; display:flex; align-items:center; gap:10px;">
+                    <span id="w-email">...</span> <span id="w-admin"></span>
                 </div>
             </div>
+
+            <div class="card">
+                <h4>Nạp tiền Giftcode</h4>
+                <div class="inp-box" style="margin-top:15px;"><input type="text" id="gift-code-input" placeholder="Nhập mã nạp tiền của bạn..."></div>
+                <button class="btn btn-primary" onclick="useGiftcode()">XÁC NHẬN NẠP TIỀN</button>
+                <div style="font-size:10px; color:#444; margin-top:10px; text-align:center;"></div>
+            </div>
+
+            <div id="admin-panel" class="hidden">
+                <h2 style="color:var(--accent); margin: 30px 0 20px; font-weight:800;">ADMIN CONTROL</h2>
+                
+                <div class="card" style="border: 1px solid var(--accent);">
+                    <h4>Tạo Giftcode Mới</h4>
+                    <div class="inp-box" style="margin-top:15px;"><input id="adm-gift-code" placeholder="Mã nạp (vd: ZUN_100K)"></div>
+                    <div class="inp-box">
+                        <select id="adm-gift-val">
+                            <option value="">-- Chọn mệnh giá --</option>
+                            <option value="10000">10.000 VNĐ</option>
+                            <option value="20000">20.000 VNĐ</option>
+                            <option value="50000">50.000 VNĐ</option>
+                            <option value="100000">100.000 VNĐ</option>
+                            <option value="200000">200.000 VNĐ</option>
+                            <option value="500000">500.000 VNĐ</option>
+                        </select>
+                    </div>
+                    <button class="btn" style="background:var(--accent); color:#fff" onclick="adminCreateGiftcode()">TẠO MÃ GIFTCODE</button>
+                </div>
+
+                <div class="card" style="border: 1px solid var(--primary);">
+                    <h4>Cấu Hình Gói VPS</h4>
+                    <div class="inp-box"><input id="adm-p-name" placeholder="Tên gói (vd: Windows 2025)"></div>
+                    <div class="inp-box"><input id="adm-p-price" type="number" placeholder="Giá bán / Giờ"></div>
+                    <div class="inp-box"><input id="adm-p-token" placeholder="GitHub Token (ghp_...)"></div>
+                    <div class="inp-box"><input id="adm-p-repo" placeholder="Repo (User/Repo)"></div>
+                    <button class="btn btn-primary" onclick="adminCreateProduct()">CẬP NHẬT GÓI HÀNG</button>
+                </div>
+
+                <h4 style="margin:20px 0 10px; padding-left:10px;">Quản lý toàn bộ máy chủ</h4>
+                <div id="admin-vps-all"></div>
+            </div>
+            
+            <button class="btn btn-outline" style="margin-top:20px;" onclick="doLogout()">ĐĂNG XUẤT</button>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden max-w-md mx-auto">
-        <header class="flex justify-between items-center mb-6">
-            <div>
-                <h2 id="hello" class="text-2xl font-black italic text-blue-400"></h2>
-                <p id="vm-count" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1">0 MÁY ONLINE</p>
-            </div>
-            <div class="flex gap-2">
-                <button id="admin-btn" onclick="openAdmin()" class="hidden w-12 h-12 glass text-yellow-500 flex items-center justify-center"><i class="fas fa-crown"></i></button>
-                <button onclick="location.reload()" class="w-12 h-12 glass text-red-500 flex items-center justify-center"><i class="fas fa-power-off"></i></button>
-            </div>
-        </header>
+    <nav class="bottom-nav">
+        <div class="nav-link active" onclick="switchView('home', this)"><i class="fas fa-home"></i>Home</div>
+        <div class="nav-link" onclick="switchView('store', this)"><i class="fas fa-server"></i>Store</div>
+        <div class="nav-link" onclick="switchView('vps', this)"><i class="fas fa-desktop"></i>Máy</div>
+        <div class="nav-link" onclick="switchView('wallet', this)"><i class="fas fa-wallet"></i>Ví</div>
+    </nav>
 
-        <div class="glass p-6 mb-8 border-t-4 border-blue-600">
-            <div class="bg-black/40 p-4 rounded-xl mb-4 text-center border border-white/5">
-                <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Mã Key Truy Cập</p>
-                <p id="my-key" class="text-xl font-black tracking-widest font-mono text-purple-400">CHỜ CẤP</p>
+    <div class="modal" id="auth-modal">
+        <div class="sheet">
+            <div class="auth-tabs">
+                <div class="tab active" id="t-login" onclick="setAuthMode('login')">ĐĂNG NHẬP</div>
+                <div class="tab" id="t-reg" onclick="setAuthMode('register')">ĐĂNG KÝ</div>
             </div>
-            <input type="text" id="key-input" placeholder="Dán mã ZUN-XXXX..." class="input-style w-full p-4 rounded-2xl mb-4 text-center font-bold text-blue-400 border border-blue-500/20">
-            <button onclick="createVM()" id="run-btn" class="w-full btn-main py-5 rounded-2xl text-xs uppercase tracking-widest shadow-lg">
-                <i class="fas fa-play mr-2"></i> KHỞI TẠO WINDOWS VM
-            </button>
-        </div>
-
-        <div id="vm-list" class="space-y-6 pb-20"></div>
-    </div>
-
-    <div id="admin-modal" class="fixed inset-0 bg-black/98 hidden p-6 z-50 overflow-y-auto">
-        <div class="max-w-md mx-auto">
-            <div class="flex justify-between items-center mb-8">
-                <h3 class="text-xl font-black uppercase text-blue-500 italic">Quản Lý Member</h3>
-                <button onclick="document.getElementById('admin-modal').classList.add('hidden')" class="text-red-500 text-3xl"><i class="fas fa-times-circle"></i></button>
-            </div>
-            <div id="user-list" class="space-y-4"></div>
+            <div class="inp-box"><i class="fas fa-user"></i><input id="auth-u" placeholder="Tên tài khoản..."></div>
+            <div class="inp-box"><i class="fas fa-lock"></i><input id="auth-p" type="password" placeholder="Mật khẩu..."></div>
+            <button class="btn btn-primary" onclick="runAuth()">TIẾP TỤC</button>
+            <button class="btn btn-outline" style="margin-top:10px;" onclick="closeAuth()">HỦY BỎ</button>
         </div>
     </div>
 
     <script>
-        const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        let me = null;
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrKWSjYj7x8gUKPXUyHKTidAFtOIa5ul4",
+            authDomain: "zunrdp.firebaseapp.com",
+            databaseURL: "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "zunrdp",
+            storageBucket: "zunrdp.firebasestorage.app",
+            messagingSenderId: "147267232968",
+            appId: "1:147267232968:web:4354280b9db538026831fd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-        function toggleAuth(reg) {
-            document.getElementById('login-btns').style.display = reg ? 'none' : 'grid';
-            document.getElementById('reg-btns').style.display = reg ? 'block' : 'none';
+        let currentUser = null;
+        let isAdmin = false;
+
+        const toEmail = (u) => u.includes('@') ? u : u + "@zun.com";
+        const toName = (e) => e.replace("@zun.com", "");
+
+        function openAuth() { document.getElementById('auth-modal').classList.add('open'); }
+        function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
+        function setAuthMode(m) { 
+            document.getElementById('t-login').className = m === 'login' ? 'tab active' : 'tab'; 
+            document.getElementById('t-reg').className = m === 'register' ? 'tab active' : 'tab'; 
         }
 
-        async function auth(type) {
-            const u = document.getElementById('u-in').value.trim().toLowerCase(); // Luôn lưu chữ thường
-            const p = document.getElementById('p-in').value.trim();
-            if(!u || !p) return alert("Thiếu thông tin!");
-
+        async function runAuth() {
+            const u = document.getElementById('auth-u').value.trim();
+            const p = document.getElementById('auth-p').value.trim();
+            if(!u || !p) return alert("Điền đủ thông tin!");
+            const e = toEmail(u);
+            const isLogin = document.getElementById('t-login').classList.contains('active');
             try {
-                if(type === 'register') {
-                    await fetch(`${API}/users/${u}.json`, { method:'PUT', body: JSON.stringify({password:p, key:'', githubToken:'', customRepo:'', maxVM:1}) });
-                    alert("Đăng ký thành công!"); toggleAuth(false);
-                } else {
-                    if(u === "zunrdp" && p === "26082007ngoc") me = { id:u, role:'admin', key:'ADMIN-MASTER', maxVM:999 };
-                    else {
-                        const data = await fetch(`${API}/users/${u}.json`).then(r => r.json());
-                        if(data && data.password === p) me = { id:u, role:'user', ...data };
-                        else return alert("Sai tài khoản!");
+                if(isLogin) { await auth.signInWithEmailAndPassword(e, p); closeAuth(); }
+                else { 
+                    const res = await auth.createUserWithEmailAndPassword(e, p);
+                    await db.ref('users/' + res.user.uid).set({ email: e, balance: 0, role: 'user', banned: false });
+                    closeAuth();
+                }
+            } catch(err) { alert(err.message); }
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                db.ref('users/' + user.uid).on('value', snap => {
+                    const d = snap.val();
+                    if(!d || d.banned) { if(d?.banned) alert("Tài khoản đã bị BAN!"); auth.signOut(); return; }
+                    currentUser = user; isAdmin = d.role === 'admin';
+                    const name = toName(user.email);
+                    document.getElementById('u-name').innerText = name;
+                    document.getElementById('u-avatar').innerText = name[0].toUpperCase();
+                    document.getElementById('w-email').innerText = name;
+                    document.getElementById('w-balance').innerText = d.balance.toLocaleString() + " VNĐ";
+                    if(isAdmin) {
+                        document.getElementById('w-admin').innerHTML = '<span class="admin-badge">ADMIN</span>';
+                        document.getElementById('admin-panel').classList.remove('hidden');
+                        loadAdminAllVms();
                     }
-                    start();
-                }
-            } catch(e) { alert("Lỗi kết nối!"); }
-        }
-
-        function start() {
-            document.getElementById('auth-gate').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('hello').innerText = `HI, ${me.id.toUpperCase()}`;
-            document.getElementById('my-key').innerText = me.key || "CHỜ CẤP";
-            if(me.role === 'admin') document.getElementById('admin-btn').classList.remove('hidden');
-            setInterval(fetchVM, 5000); fetchVM();
-        }
-
-        async function createVM() {
-            const inputKey = document.getElementById('key-input').value.trim();
-            const btn = document.getElementById('run-btn');
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> ĐANG GỬI LỆNH...';
-
-            try {
-                const users = await fetch(`${API}/users.json`).then(r => r.json());
-                let target = null;
-                for(let u in users) { if(users[u].key === inputKey) { target = users[u]; break; } }
-                if(inputKey === "ADMIN-MASTER") target = { githubToken: "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", customRepo: "vpsf0605-dev/zunrdp-Cloud", maxVM: 999 };
-
-                if(!target) throw new Error("Key không tồn tại!");
-
-                const res = await fetch(`https://api.github.com/repos/${target.customRepo}/actions/workflows/vm.yml/dispatches`, {
-                    method:'POST',
-                    headers:{ 'Authorization':`Bearer ${target.githubToken}`, 'Accept': 'application/vnd.github.v3+json' },
-                    body: JSON.stringify({ref:'main', inputs:{access_key: "ADMIN-MASTER"}})
                 });
-
-                if(res.ok || res.status === 204) alert("🚀 Đã gửi lệnh tạo máy!");
-                else alert("❌ Lỗi GitHub: Check lại Token/Repo!");
-            } catch(e) { alert("❌ " + e.message); }
-            btn.disabled = false; btn.innerText = "KHỞI TẠO WINDOWS VM";
-        }
-
-        async function fetchVM() {
-            try {
-                const res = await fetch(`${API}/vms.json`);
-                const vms = await res.json() || {};
-                let h = ''; let count = 0;
-                
-                for(let id in vms) {
-                    const v = vms[id];
-                    // CHUẨN HÓA ĐỂ SO SÁNH (Tránh lỗi chữ hoa chữ thường)
-                    const ownerName = (v.owner || "").toLowerCase().trim();
-                    const myName = me.id.toLowerCase().trim();
-
-                    // Admin thấy hết, Member chỉ thấy máy mình
-                    if(me.role !== 'admin' && ownerName !== myName) continue;
-                    if(Date.now() - v.lastSeen > 120000) continue;
-                    
-                    count++;
-                    const cC = v.cpu > 80 ? 'bg-red-500' : 'bg-green-500';
-                    const rC = v.ram > 80 ? 'bg-red-500' : 'bg-green-500';
-
-                    h += `<div class="glass p-6 mb-4 border-l-4 border-blue-500 shadow-xl">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-bold uppercase">Machine ID</p>
-                                <h3 class="font-black text-blue-400 italic text-lg">${v.id}</h3>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] text-gray-500 font-bold uppercase">Người tạo</p>
-                                <p class="text-[10px] text-purple-400 font-black uppercase">${v.owner || 'N/A'}</p>
-                            </div>
-                        </div>
-                        <div class="space-y-3 mb-4 text-[9px] font-bold uppercase">
-                            <div><div class="flex justify-between mb-1"><span>CPU</span><span>${v.cpu}%</span></div><div class="progress-bar"><div class="progress-fill ${cC}" style="width:${v.cpu}%"></div></div></div>
-                            <div><div class="flex justify-between mb-1"><span>RAM</span><span>${v.ram}%</span></div><div class="progress-bar"><div class="progress-fill ${rC}" style="width:${v.ram}%"></div></div></div>
-                        </div>
-                        <div class="bg-black/60 p-4 rounded-2xl text-[10px] font-mono border border-white/5 space-y-2 mb-4">
-                            <p class="flex justify-between"><span>IP:</span> <span class="text-blue-400 font-bold">${v.ip}</span></p>
-                            <p class="flex justify-between"><span>PASS:</span> <span class="text-yellow-400 font-bold">ZunRDP@123456</span></p>
-                        </div>
-                        <button onclick="killVM('${id}')" id="btn-stop-${id}" class="w-full py-3 bg-red-600/20 text-red-500 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition border border-red-500/30">DỪNG MÁY NGAY</button>
-                    </div>`;
-                }
-                document.getElementById('vm-list').innerHTML = h || '<p class="text-center opacity-20 py-10 italic">KHÔNG CÓ MÁY ONLINE</p>';
-                document.getElementById('vm-count').innerText = `${count} MÁY ONLINE`;
-            } catch(e) {}
-        }
-
-        async function killVM(vmId) {
-            if(!confirm("Xác nhận tắt máy ảo?")) return;
-            const btn = document.getElementById(`btn-stop-${vmId}`);
-            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> DỪNG...';
-            try {
-                await fetch(`${API}/commands/${vmId}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
-                alert("✅ Lệnh tắt đã gửi!");
-            } catch(e) { alert("Lỗi kết nối!"); }
-        }
-
-        async function openAdmin() {
-            document.getElementById('admin-modal').classList.remove('hidden');
-            const res = await fetch(`${API}/users.json`);
-            const users = await res.json() || {};
-            let h = '';
-            for(let n in users) {
-                h += `<div class="glass p-4 flex justify-between items-center mb-3">
-                    <div class="max-w-[180px]">
-                        <p class="font-black uppercase text-sm text-blue-400">${n}</p>
-                        <p class="text-[9px] text-purple-400 font-bold">Limit: ${users[n].maxVM || 1} VM</p>
-                    </div>
-                    <button onclick="grant('${n}')" class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center"><i class="fas fa-edit text-xs"></i></button>
-                </div>`;
+                loadUserVms();
+                loadProducts();
+            } else {
+                currentUser = null;
+                document.getElementById('u-name').innerText = "Đăng nhập";
+                document.getElementById('admin-panel').classList.add('hidden');
             }
-            document.getElementById('user-list').innerHTML = h;
-        }
+        });
 
-        async function grant(username) {
-            const token = prompt("GitHub Token:"); if(!token) return;
-            const repo = prompt("Repo (user/repo):"); if(!repo) return;
-            const limit = prompt("Số lượng máy:", "1");
-            const randomKey = "ZUN-" + Math.floor(Math.random() * 9000 + 1000);
-            await fetch(`${API}/users/${username}.json`, { 
-                method:'PATCH', 
-                body: JSON.stringify({ key: randomKey, githubToken: token.trim(), customRepo: repo.trim(), maxVM: parseInt(limit) || 1 }) 
+        // LOAD PRODUCTS
+        function loadProducts() {
+            db.ref('products').on('value', snap => {
+                const render = document.getElementById('product-list-render');
+                render.innerHTML = "";
+                snap.forEach(c => {
+                    const p = c.val();
+                    render.innerHTML += `
+                        <div class="card" style="border-left: 5px solid var(--primary);">
+                            <div style="display:flex; justify-content:space-between; align-items:center">
+                                <div>
+                                    <h4 style="font-size:18px;">${p.name}</h4>
+                                    <p style="font-size:11px; color:var(--sub);">Mã gói: ${c.key}</p>
+                                </div>
+                                <div style="text-align:right;"><span style="color:var(--success); font-weight:800; font-size:20px;">${p.price.toLocaleString()}đ</span></div>
+                            </div>
+                            <div class="inp-box" style="margin-top:15px;"><input id="key-${c.key}" placeholder="Nhập Key Tailscale..."></div>
+                            <button class="btn btn-primary" onclick="deployVM('${c.key}', ${p.price}, '${p.token}', '${p.repo}')">THUÊ GÓI NÀY</button>
+                        </div>
+                    `;
+                });
             });
-            alert("Đã xong!"); openAdmin();
         }
-    </script>
-</body>
-</html>
 
+        async function deployVM(pId, price, token, repo) {
+            if(!currentUser) return openAuth();
+            const tsKey = document.getElementById('key-' + pId).value.trim();
+            if(!tsKey) return alert("Nhập Key Tailscale!");
+
+            const userSnap = await db.ref('users/' + currentUser.uid).once('value');
+            const bal = userSnap.val().balance || 0;
+            if(bal < price) return alert("Không đủ tiền nạp vào ví!");
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event_type: "vps_request", client_payload: { owner_name: toName(currentUser.email), ts_key: tsKey } })
+                });
+                if(res.ok) {
+                    db.ref('users/' + currentUser.uid).update({ balance: bal - price });
+                    alert("Trừ tiền thành công và đã gửi lệnh mở máy!"); switchView('vps');
+                } else alert("GitHub không phản hồi!");
+            } catch(e) { alert("Lỗi kết nối mạng!"); }
+        }
+
+        // ADMIN FUNCTIONS
+        function adminCreateProduct() {
+            const name = document.getElementById('adm-p-name').value;
+            const price = parseInt(document.getElementById('adm-p-price').value);
+            const token = document.getElementById('adm-p-token').value;
+            const repo = document.getElementById('adm-p-repo').value;
+            if(name && price && token && repo) {
+                db.ref('products/' + Date.now()).set({ name, price, token, repo }).then(() => alert("Đã cập nhật!"));
+            }
+        }
+
+        function adminCreateGiftcode() {
+            const code = document.getElementById('adm-gift-code').value.trim();
+            const amt = parseInt(document.getElementById('adm-gift-val').value);
+            if(!code || !amt) return alert("Chọn mệnh giá và nhập mã!");
+            db.ref('giftcodes/' + code).set({ amount: amt }).then(() => {
+                alert("Đã tạo Giftcode thành công!");
+                document.getElementById('adm-gift-code').value = "";
+            });
+        }
+
+        function loadUserVms() {
+            db.ref('vms').on('value', snap => {
+                const render = document.getElementById('vps-render');
+                render.innerHTML = "";
+                snap.forEach(c => {
+                    const v = c.val();
+                    if(v.owner === toName(currentUser.email)) render.innerHTML += renderVmCard(v, false);
+                });
+            });
+        }
+
+        function loadAdminAllVms() {
+            db.ref('vms').on('value', snap => {
+                const render = document.getElementById('admin-vps-all');
+                render.innerHTML = "";
+                snap.forEach(c => { render.innerHTML += renderVmCard(c.val(), true); });
+            });
+        }
+
+        function renderVmCard(v, admin) {
+            return `
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px">
+                        <span style="color:var(--primary); font-weight:800;">${v.id}</span>
+                        <span style="font-size:10px; color:var(--sub);">${v.owner}</span>
+                    </div>
+                    <div style="background:#000; padding:15px; border-radius:15px; margin-bottom:12px; font-size:13px; border:1px solid #222;">
+                        IP: <b style="color:var(--success); font-size:16px;">${v.ip || '---'}</b><br>
+                        U: <b>${v.user}</b> | P: <b>${v.pass}</b>
+                    </div>
+                    <div class="stat-container">
+                        <div class="stat-box"><span class="stat-value">${v.cpu}%</span><span style="fon
